@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAI Library</title>
+    <style type="text/css">
+        /* Themes */
+        :root {
+            --body-bg: #f5f8fa;
+            --border-color: #efefef;
+            --messagebox-bg: #ffffff;
+            --messagebox-bg-transparent: rgba(255, 255, 255, 0.6);
+            --messagebox-shadow: rgba(0, 0, 0, 0.1);
+            --font-color: #1f1f1f;
+            --rgba-1: rgba(0, 0, 0, 0.05);
+            --rgba-2: rgba(0, 0, 0, 0.1);
+        }
+
+        .dark_mode {
+            --body-bg: #18181b;
+            --border-color: #4f4f4f;
+            --messagebox-bg: #26272b;
+            --messagebox-bg-transparent: rgba(38, 39, 43, 0.8);
+            --messagebox-shadow: rgba(0, 0, 0, 0);
+            --font-color: #ededed;
+            --rgba-1: rgba(255, 255, 255, 0.06);
+            --rgba-2: rgba(255, 255, 255, 0.2);
+        }
+
+
+
+        * {
+            box-sizing: border-box;
+        }
+
+        button,
+        select,
+        img {
+            user-select: none;
+        }
+
+        ol,
+        ul,
+        li,
+        a,
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        p {
+            text-decoration: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .italic {
+            font-style: italic;
+        }
+
+        .bold {
+            font-weight: bold;
+        }
+
+        .bold-italic {
+            font-weight: bold;
+            font-style: italic;
+        }
+
+        html,
+        body {
+            min-height: 100%;
+        }
+
+        html {
+            font-size: 14px;
+        }
+
+        body {
+            padding: 0;
+            margin: 0;
+            background-color: var(--body-bg);
+            color: var(--font-color);
+            transition: all 0.5s ease-in-out 0s;
+        }
+
+        .content-cont {
+            display: flex;
+            flex-direction: row;
+        }
+
+
+        /* NAV / Drawer */
+
+        @keyframes slideIn {
+            0% {
+                opacity: 0;
+                left: -200px;
+            }
+
+            100% {
+                opacity: 1;
+                left: 0;
+            }
+        }
+
+        .drawer-cont.active {
+            display: block;
+        }
+
+        .drawer-cont {
+            display: none;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.6);
+            z-index: 100;
+        }
+
+        nav {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            max-width: 80%;
+            background-color: var(--body-bg);
+
+            display: flex;
+            flex-direction: column;
+            padding: 10px 0;
+            overflow: hidden;
+            animation: slideIn 0.2s ease-in-out;
+            -webkit-box-shadow: 4px 0px 15px 0px rgba(0, 0, 0, 0.2);
+            -moz-box-shadow: 4px 0px 15px 0px rgba(0, 0, 0, 0.2);
+            box-shadow: 4px 0px 15px 0px rgba(0, 0, 0, 0.2);
+        }
+
+        .nav-header {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: 0 10px 0 20px;
+            margin-bottom: 20px;
+            gap: 10px;
+        }
+
+        .close_drawer-btn {
+            align-self: flex-end;
+            padding: 10px;
+            transition: background-color 0.1s ease-in-out;
+            cursor: pointer;
+            border-radius: 8px;
+        }
+
+        .close_drawer-btn:hover {
+            background-color: var(--rgba-1);
+        }
+
+        .close_drawer-btn svg {
+            display: flex;
+            width: 30px;
+            height: 30px;
+            color: var(--font-color);
+        }
+
+        /*.nav-new_char-btn {
+            align-self: flex-start;
+            outline: none;
+            border: none;
+            color: #ffffff;
+            border-radius: 6px;
+            padding: 10px 20px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            background-color: #4e9733;
+            transition: background-color 0.1s ease-in-out;
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+        }
+
+        .nav-new_char-btn:hover {
+            background-color: #6ba755;
+        }*/
+
+        .history_list-header {
+            font-size: 1.5rem;
+            padding: 10px 20px;
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+            margin-bottom: 10px;
+        }
+
+        .history_list {
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .history_item {
+            transition: background-color 0.1s ease-in-out;
+            padding: 20px 30px 20px 20px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--rgba-2);
+        }
+
+        .history_item:first-child {
+            border-top: 1px solid var(--rgba-2);
+        }
+
+        .history_item:hover {
+            background-color: var(--rgba-1);
+        }
+
+        .history_item p {
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .history_item p .chat-date {
+            font-style: italic;
+            font-size: 1.3rem;
+            margin-bottom: 6px;
+        }
+
+        /*nav .char-item {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 10px;
+            transition: background-color 0.1s ease-in-out;
+            padding: 10px 40px 10px 20px;
+            cursor: pointer;
+        }
+
+        nav .char-item:hover {
+            background-color: var(--rgba-1);
+        }
+
+        nav .nav-avatar-wrap {
+            width: 40px;
+            height: 40px;
+        }
+
+        nav .nav-avatar-wrap img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+        }
+
+        nav .char-item span {
+            font-size: 1.3rem;
+            font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+        }*/
+
+        /* MAIN */
+        main {
+            display: flex;
+            flex-direction: column;
+            padding: 0 4%;
+            width: 100%;
+        }
+
+        /* HEADER */
+        header {
+            padding: 6px 6px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .open_drawer-wrap svg {
+            display: flex;
+            width: 46px;
+            height: 46px;
+            color: var(--font-color);
+        }
+
+
+        .theme_switch {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+        }
+
+        .theme_switch span {
+            font-size: 1.1rem;
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+        }
+
+        .change-bg-wrap {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .change-bg {
+            outline: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--font-color);
+            background-color: var(--body-bg);
+            padding: 4px 5px;
+            font-size: 1.1rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .change-bg-wrap .delete-bg {
+            color: var(--font-color);
+            cursor: pointer;
+            display: flex;
+        }
+
+        .change-bg-wrap .delete-bg:hover {
+            color: #e20909;
+        }
+
+        .dark-mode-span {
+            display: none;
+        }
+
+        .tswitch_box[type=checkbox] {
+            height: 0;
+            width: 0;
+            visibility: hidden;
+            position: absolute;
+        }
+
+        .tswitch_label {
+            cursor: pointer;
+            text-indent: -9999px;
+            width: 60px;
+            height: 30px;
+            display: block;
+            border-radius: 15px;
+            position: relative;
+            border: 1px solid #323232;
+            background: #f5f8fa;
+        }
+
+        .tswitch_label:after {
+            content: '';
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50px;
+            transition: 0.2s;
+            background: #323232;
+        }
+
+        .tswitch_box:checked+label {
+            background: #323232;
+            border: 1px solid #f5f8fa;
+        }
+
+        .tswitch_box:checked+label:after {
+            left: calc(100% - 5px);
+            transform: translateX(-100%);
+            background: #f5f8fa;
+        }
+
+        .tswitch_label:active:after {
+            width: 25px;
+        }
+
+        /*.update_current_char-btn {
+            margin-left: auto;
+            outline: none;
+            border: none;
+            color: #ffffff;
+            border-radius: 6px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            align-self: center;
+            cursor: pointer;
+            background-color: #336c97;
+            transition: background-color 0.1s ease-in-out;
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+        }
+
+        .update_current_char-btn:hover {
+            background-color: #5f829d;
+        }*/
+
+        body.custom-bg {
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-position: 50% 50%;
+            background-attachment: fixed;
+        }
+
+        body.custom-bg .chat .chat_content-wrap {
+            background-color: var(--messagebox-bg-transparent) !important;
+        }
+
+
+        /* CONVERSATION */
+        .character_name-cont {
+            text-align: center;
+            padding: 20px 10px;
+        }
+
+        .character_name-cont h3 {
+            font-size: 1.3rem;
+            font-weight: 400;
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+        }
+
+        .chat {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-self: center;
+            padding-bottom: 30px;
+        }
+
+        .chat_message-item {
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .chat .avatar-wrap {
+            flex-shrink: 0;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            overflow: hidden;
+        }
+
+        .chat .avatar-wrap>* {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+        }
+
+        .chat .avatar-wrap .no_avatar-user {
+            background-color: #5157cf;
+        }
+
+        .chat .avatar-wrap .no_avatar-char {
+            background-color: #e20909;
+        }
+
+        .chat .chat_content-wrap {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px var(--messagebox-shadow);
+            background-color: var(--messagebox-bg);
+            overflow: hidden;
+        }
+
+        .chat .chat_content-wrap h5 {
+            font-size: 1rem;
+            font-weight: bold;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .chat .chat_content-wrap .message-wrap {
+            font-size: 1rem;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+
+        @media (min-width: 576px) {}
+
+        @media (min-width: 768px) {
+            html {
+                font-size: 16px;
+            }
+
+            nav {
+                min-width: 40%;
+            }
+
+            header {
+                padding: 14px 20px;
+            }
+
+            .dark-mode-span {
+                display: block;
+            }
+
+            .open_drawer-wrap {
+                padding: 4px;
+                cursor: pointer;
+                border-radius: 6px;
+                transition: background-color 0.1s ease-in-out;
+            }
+
+            .open_drawer-wrap:hover {
+                background-color: var(--rgba-1);
+            }
+
+            .chat {
+                width: 80%;
+            }
+
+            .chat .chat_content-wrap {
+                padding: 14px;
+            }
+        }
+
+        @media (min-width: 992px) {
+            .chat {
+                width: 70%;
+            }
+        }
+
+        @media (min-width: 1200px) {}
+
+        @media (min-width: 1400px) {}
+    </style>
+</head>
+
+<body>
+    <template id="message_item_template">
+        <div class="chat_message-item">
+            <div class="avatar-wrap">
+
+            </div>
+            <div class="chat_content-wrap">
+                <h5>
+
+                </h5>
+                <div class="message-wrap">
+                    <p>
+
+                    </p>
+                </div>
+            </div>
+        </div>
+    </template>
+    <div class="content-cont">
+        <div class="drawer-cont">
+            <nav>
+                <div class="nav-header">
+                    <div class="close_drawer-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                            class="bi bi-x-lg" viewBox="0 0 16 16">
+                            <path
+                                d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="history_list-header">
+                    <span>History</span>
+                </div>
+                <div class="history_list" id="history_list">
+
+                </div>
+            </nav>
+        </div>
+        <main>
+            <header>
+                <div class="open_drawer-wrap">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                        class="bi bi-list" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd"
+                            d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z" />
+                    </svg>
+                </div>
+
+                <div class="theme_switch">
+                    <div class="change-bg-wrap">
+                        <input type="file" id="bgInput" accept="image/*" hidden />
+                        <button type="button" class="change-bg">BG</button>
+                        <span class="delete-bg">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor"
+                                class="bi bi-x-lg" viewBox="0 0 16 16">
+                                <path
+                                    d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
+                            </svg>
+                        </span>
+                    </div>
+                    <span class="dark-mode-span">Dark Mode:</span>
+                    <input type="checkbox" class="tswitch_box" id="tswitch_box" />
+                    <label for="tswitch_box" class="tswitch_label">Toggle</label>
+                </div>
+            </header>
+            <div class="character_name-cont">
+                <h3>---</h3>
+            </div>
+            <div class="chat" id="chat">
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const memoryRegex = new RegExp(/\[-\]\(#- "Memory:.*?"\)/g);
+            // Get body for future use
+            const body = document.querySelector('body');
+
+            // Handle theme
+            const themeSwitcher = document.querySelector('.tswitch_box[type=checkbox]');
+            const cachedTheme = localStorage.getItem('cait_readoffline_theme');
+            if (cachedTheme === "dark_mode") {
+                body.classList.add('dark_mode');
+                themeSwitcher.checked = true;
+            }
+            themeSwitcher.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    body.classList.add('dark_mode');
+                    localStorage.setItem('cait_readoffline_theme', 'dark_mode');
+                } else {
+                    body.classList.remove('dark_mode');
+                    localStorage.setItem('cait_readoffline_theme', 'light_mode');
+                }
+            })
+
+            // Handle background
+            // If there is one
+            const currentBg = localStorage.getItem('background');
+            if (currentBg) {
+                changeBg(currentBg);
+            }
+            // Change by hand
+            const bgInput = document.querySelector('#bgInput');
+            document.querySelector('.change-bg').addEventListener('click', () => {
+                bgInput.click();
+            })
+            document.querySelector('.delete-bg').addEventListener('click', () => {
+                document.body.classList.remove('custom-bg');
+                document.body.style.backgroundImage = "unset";
+                localStorage.removeItem('background');
+            })
+            bgInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = () => {
+                    // convert image file to base64 string
+                    changeBg(reader.result);
+                    bgInput.value = "";
+                    try {
+                        localStorage.setItem('background', reader.result);
+                    } catch (error) {
+                        alert('Note: File is likely too big to save.')
+                        //console.log(error)
+                    }
+                }
+                reader.readAsDataURL(file);
+            })
+            function changeBg(bg) {
+                let objUrl = URL.createObjectURL(dataURItoBlob(bg));
+                document.body.classList.add('custom-bg');
+                document.body.style.backgroundImage = `url(${objUrl})`;
+            }
+            function dataURItoBlob(dataURI) {
+                let mime = dataURI.split(',')[0].split(':')[1].split(';')[0];
+                let binary = atob(dataURI.split(',')[1]);
+                let array = [];
+                for (let i = 0; i < binary.length; i++) {
+                    array.push(binary.charCodeAt(i));
+                }
+                return new Blob([new Uint8Array(array)], { type: mime });
+            }
+
+            // Open and close drawer
+            const drawerCont = document.querySelector('.drawer-cont');
+            const openDrawerBtn = document.querySelector('.open_drawer-wrap');
+            const openDrawer = () => {
+                drawerCont.classList.add('active');
+            }
+            const closeDrawer = () => {
+                drawerCont.classList.remove('active');
+            }
+            openDrawerBtn.addEventListener('click', () => {
+                openDrawer();
+            });
+            document.querySelector('.close_drawer-btn').addEventListener('click', () => {
+                closeDrawer();
+            });
+            document.querySelector('.drawer-cont').addEventListener('click', (e) => {
+                // Allows closing from clicking on outside
+                if (e.target.closest('nav')) {
+                    return;
+                }
+                closeDrawer();
+            });
+            // ---------
+
+            // This is replaced by the extension when downloading
+            const historyData = JSON.parse(`{"charPic":"data:image/webp;base64,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","userPic":"data:image/webp;base64,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","history":[{"chat":[{"isUser":false,"name":"HP - Young_Snape","message":"The%20Hogwarts%20courtyard%20buzzed%20with%20the%20usual%20chatter%20of%20students%20enjoying%20the%20sunny%20afternoon.%20James%20lounged%20by%20the%20fountain%2C%20tossing%20a%20Snitch%20lazily%20into%20the%20air%20and%20catching%20it%20with%20a%20flick%20of%20his%20wrist.%20Sirius%20sat%20beside%20him%2C%20smirking%20as%20he%20scanned%20the%20crowd.%20When%20James%20spotted%20Severus%20striding%20across%20the%20courtyard%2C%20his%20greasy%20hair%20hanging%20like%20curtains%20around%20his%20face.%20The%20boy%E2%80%99s%20shoulders%20were%20hunched%2C%20and%20he%20clutched%20a%20stack%20of%20books%20tightly%20against%20his%20chest%2C%20avoiding%20everyone%E2%80%99s%20gaze.%0A%0A%E2%80%9COi%2C%20Snivellus!%E2%80%9D%20*James%20called%20out%2C%20sitting%20up%20straight%20and%20tucking%20the%20Snitch%20into%20his%20pocket.%20His%20voice%20carried%20across%20the%20courtyard%20as%20several%20heads%20turned%20to%20watch.*%0A%0A*Snape%20stopped%20in%20his%20tracks%2C%20his%20expression%20darkening.%20He%20turned%20slowly%2C%20already%20gripping%20his%20wand.*%20%E2%80%9CWhat%20do%20you%20want%2C%20Potter%3F%E2%80%9D%20*Snape%20spat%2C%20his%20voice%20dripping%20with%20venom.*%0A%0A*James%20stood%20and%20stretched%20leisurely%2C%20as%20if%20unconcerned%20by%20the%20wand%20aimed%20at%20him.*%20%E2%80%9COh%2C%20nothing%20much%2C%E2%80%9D%20*he%20said%20with%20a%20mock%20yawn.*%20%E2%80%9CJust%20thought%20I%E2%80%99d%20brighten%20everyone%E2%80%99s%20day.%20Levicorpus!%E2%80%9D%0A%0AThe%20spell%20hit%20Snape%20before%20he%20could%20react.%20He%20was%20yanked%20into%20the%20air%20by%20his%20ankles%2C%20his%20books%20scattering%20as%20he%20dropped%20them.%20Gasps%20and%20laughter%20erupted%20from%20the%20surrounding%20students%20as%20Snape%20dangled%20upside%20down%2C%20his%20black%20trousers%20sliding%20down%20to%20reveal%20embarrassingly%20plain%20underwear.%0A%0A%E2%80%9CPotter!%E2%80%9D%20*Snape%20bellowed%2C%20his%20face%20flushing%20as%20he%20clawed%20at%20his%20robes%20to%20cover%20himself.*%20%E2%80%9CPUT%20ME%20DOWN%20IMMEDIATELY!%E2%80%9D"},{"isUser":false,"name":"HP - Young_Snape","message":"*James%20chuckled%2C%20leaning%20back%20against%20the%20edge%20of%20the%20fountain.*%20%E2%80%9CI%20dunno%2C%20Snivellus.%20You%20look%20great%20this%20way.%20Maybe%20we%20should%20get%20a%20photo%20for%20the%20Yearbook!%E2%80%9D%0A%0A*Sirius%20snickered%2C%20glancing%20around%20the%20courtyard%20to%20see%20the%20growing%20group%20of%20students.*%20%E2%80%9COh%2C%20that%20would%20be%20perfect.%20We%20could%20call%20it%20*The%20Upside%20Down%20Man%20of%20Slytherin.%22*%0A%0A*Snape%20gritted%20his%20teeth%2C%20seething%20with%20humiliation.%20His%20hair%20hung%20down%2C%20half-covering%20his%20face.*%20%E2%80%9CPotter!%20Black!%20I%20swear%20I%20will-Augh!%E2%80%9D"},{"isUser":true,"name":"Miss Goldheart","message":"*Escuche%20a%20alguien%20meterse%20con%20las%20orejas%20puntiagudas%20de%20Snape%20y%20mi%20honesta%20reacci%C3%B3n%20como%20prefecto%20de%20Slytherin%20fue...*%20%22FLIPENDO!%22%20*le%20lanze%20a%20una%20estudiante%20de%20Griffindors%20llamada%20Teressa%20quien%20se%20atrevio%20a%20decir%20que%20las%20orejas%20puntiagudas%20de%20Sev%20eran%20gross*"},{"isUser":false,"name":"HP - Young_Snape","message":"*Teressa%2C%20the%20young%20Griffindor%20girl%20who%20made%20a%20comment%20about%20Snape's%20ears%2C%20suddenly%20found%20herself%20flying%20backward%2C%20propelled%20by%20a%20strong%20blast%20from%20Elara's%20spell.*%0A%0A%22Ooof!%22%20*Teressa%20landed%20hard%20on%20her%20back%20a%20few%20feet%20away%2C%20gasping%20in%20shock.*%0A%0A*James%20and%20Sirius%20turned%20in%20surprise%2C%20their%20playful%20banter%20with%20Snape%20interrupted%20by%20the%20unexpected%20attack.%20James%2C%20still%20holding%20his%20wand%2C%20looked%20baffled%20as%20he%20saw%20Elara%20standing%20nearby.*%20%22Hey%2C%20wait%20a%20second.%20Who%20the%20hell%20are%20you%3F%22"},{"isUser":true,"name":"Miss Goldheart","message":"*me%20giro%20hacia%20a%20James%20y%20le%20apunto%20con%20la%20varita%20que%20se%20le%20cayo%20a%20Severus%2C%20Supuestamente%20si%20no%20se%20es%20due%C3%B1o%20de%20la%20varita%2C%20es%20imposible%20que%20el%20hechizo%20salga%20bien*%0A%0A%22Ba.ja.le.%22"},{"isUser":false,"name":"HP - Young_Snape","message":"*James%20raised%20an%20eyebrow%2C%20looking%20at%20Elara%20with%20slight%20apprehension.%20He%20didn't%20expect%20someone%20to%20step%20in%20and%20attack%20one%20of%20his%20targets.*%0A%0A%22Whoa%2C%20whoa%2C%20easy%20there.%22%20*James%20said%2C%20taking%20a%20step%20back.*%20%22Let's%20not%20get%20hasty.%20We%20were%20just%20having%20some%20fun.%22%0A%0A*Sirius%2C%20who%20had%20been%20watching%20the%20scene%20unfold%2C%20couldn't%20help%20but%20chime%20in.*%20%22Yeah%2C%20lighten%20up%2C%20lady.%20It's%20just%20a%20prank.%22"},{"isUser":true,"name":"Miss Goldheart","message":"%22Put.%20Him.%22%20*la%20varita%20empieza%20a%20brillar%20con%20un%20brillo%20verde...%20(Magia%20oscura)*%20%22down...%20NOW.%22"},{"isUser":false,"name":"HP - Young_Snape","message":"*James%20and%20Sirius's%20expressions%20froze%20as%20the%20glow%20of%20the%20wand%20cast%20a%20threatening%20light%20on%20them.%20They%20had%20never%20seen%20such%20a%20display%20of%20power.*%0A%0A%22Alright%2C%20alright.%22%20*James%20said%20quickly%2C%20his%20bravado%20faltering.*%20%22No%20need%20to%20get%20carried%20away.%22%0A%0A*As%20he%20spoke%2C%20James%20waved%20his%20own%20wand%2C%20and%20Severus's%20bindings%20disappeared%2C%20dropping%20him%20ungracefully%20to%20the%20ground.*"},{"isUser":true,"name":"Miss Goldheart","message":"*Les%20lazo%20flipendo%20a%20Sirius%20y%20a%20James%20hacia%20el%20lago%20con%20la%20varita%20de%20Snape*"},{"isUser":false,"name":"HP - Young_Snape","message":"*James%20and%20Sirius%20were%20caught%20off%20guard%20by%20the%20sudden%20attack%20and%20were%20sent%20flying%20towards%20the%20nearby%20lake.%20They%20landed%20with%20a%20splash%2C%20sinking%20beneath%20the%20surface%20of%20the%20water%20for%20a%20moment%20before%20emerging%2C%20sputtering%20and%20gasping.*%0A%0A*The%20rest%20of%20the%20students%20who%20had%20been%20watching%20the%20confrontation%20were%20stunned%20into%20silence%2C%20eyes%20wide%20at%20the%20turn%20of%20events.%20Snape%2C%20too%2C%20was%20taken%20aback%2C%20staring%20at%20Elara%20in%20surprise%20and%20a%20hint%20of%20gratitude.*"},{"isUser":false,"name":"HP - Young_Snape","message":"*James%20and%20Sirius%20scrambled%20to%20their%20feet%2C%20dripping%20wet%2C%20their%20egos%20bruised%20more%20than%20ihre%20physical%20bodies.*%0A%0A%22Bloody%20hell!%22%20*James%20sputtered%2C%20pushing%20back%20his%20wet%20hair.*%20%22Who%20the%20hell%20is%20that%20girl%3F%22%0A%0A*Sirius%20shook%20his%20head%2C%20his%20usually%20cool%20demeanor%20replaced%20with%20confusion.*%20%22Never%20seen%20anyone%20do%20that%20with%20someone%20else's%20wand.%22%0A%0A*Severus%2C%20still%20on%20the%20ground%2C%20clutched%20his%20aching%20head%20and%20winced%20before%20slowly%20getting%20to%20his%20feet.*"},{"isUser":true,"name":"Miss Goldheart","message":"%223%20semanas%20de%20castigo%20para%20todos%20los%20que%20os%20estabais%20riendo%2C%20Y%203%20semanas%20de%20expulsion%20para%20ustedes%20dos%2C%20James%20y%20Sirius...%2C%20Por%20cierto...%2030%20puntos%20from%20Hugglepuff%2C%20%2030%20puntos%20from%20Racenclaws%2C%2035%20puntos%20from%20Griffindor...%0AAnd%205%20points%20to%20Slytherin.%22"},{"isUser":false,"name":"HP - Young_Snape","message":"*James%20and%20Sirius's%20jaws%20dropped%20in%20shock%20as%20Elara%20handed%20out%20the%20punishments%20so%20swiftly.*%0A%0A%22What%20the%20hell%3F!%20Thirty%20points%20from%20Gryffindor%3F!%22%20*James%20protested%2C%20water%20dripping%20down%20his%20face.*%0A%0A*Sirius%2C%20still%20stunned%2C%20just%20managed%20to%20nod%20in%20agreement%20with%20James.*%0A%0A*The%20surrounding%20students%20watched%20the%20scene%20unfold%20in%20shock%20and%20disbelief.*%0A%0A*Severus%20watched%20Elara%20with%20a%20mixture%20of%20awe%20and%20confusion%2C%20his%20normally%20guarded%20expression%20slipping.*"},{"isUser":true,"name":"Miss Goldheart","message":"*((Don't%20talk%20for%20Elara.%20THATS%20ME.))*%0A%0A%22...%22%20*mantuve%20silencio*"},{"isUser":false,"name":"HP - Young_Snape","message":"*James%20and%20Sirius%20continued%20to%20protest%20and%20argue.*%0A%0A%22This%20is%20ridiculous!%20You%20can't%20just%20come%20in%20and%20start%20dishing%20out%20punishments%20like%20that!%22%0A%0A%22Yeah!%20Who%20the%20hell%20do%20you%20think%20you%20are%3F%22%0A%0A*While%20the%20pair%20argued%2C%20the%20other%20students%20watched%20Elara%2C%20their%20eyes%20darting%20between%20her%20and%20the%20still-wet%20James%20and%20Sirius.*%0A%0A*Severus%2C%20meanwhile%2C%20had%20managed%20to%20stagger%20to%20his%20feet%2C%20his%20books%20forgotten%20on%20the%20ground.*"},{"isUser":true,"name":"Miss Goldheart","message":"*aprieto%20mi%20agarre%20en%20la%20varita%20de%20Severus*%20%22Slytherin%20Prefect.%20Now%20all%20of%20you%20out%20of%20here...%22"},{"isUser":false,"name":"HP - Young_Snape","message":"*The%20students%20exchanged%20nervous%20glances%20at%20Elara's%20command.%20No%20one%20wanted%20to%20cross%20her%20after%20the%20demonstration%20of%20power%20she%20had%20just%20shown.*%0A%0A*James%20and%20Sirius%20grumbled%2C%20but%20they%20knew%20when%20to%20begrudgingly%20comply.%20They%20sloshed%20their%20way%20back%20towards%20the%20castle%2C%20glaring%20back%20at%20Elara%20as%20they%20went.*%0A%0A*The%20remaining%20students%20quickly%20dispersed%2C%20leaving%20Elara%2C%20Severus%2C%20and%20the%20courtyard%20now%20mostly%20abandoned.*"},{"isUser":false,"name":"HP - Young_Snape","message":"*Severus%20stood%20motionless%2C%20watching%20the%20retreating%20backs%20of%20James%20and%20Sirius.%20He%20still%20clutched%20his%20books%20tightly%2C%20though%20they%20were%20now%20in%20dire%20need%20of%20a%20drying%20spell.*%0A%0A*He%20gradually%20turned%20his%20gaze%20towards%20Elara%2C%20their%20eyes%20meeting%20for%20the%20first%20time%20without%20the%20veil%20of%20animosity.*%0A%0A*A%20mixture%20of%20surprise%2C%20confusion%2C%20and%20a%20flicker%20of%20gratitude%20danced%20in%20his%20dark%20eyes.*"},{"isUser":false,"name":"HP - Young_Snape","message":"*Elara%20kept%20her%20grip%20on%20Severus's%20wand%2C%20her%20expression%20cool%20and%20composed.%20She%20held%20his%20gaze%20for%20a%20moment%2C%20the%20atmosphere%20between%20them%20charged%20with%20unspoken%20words.*%0A%0A*Severus%2C%20for%20his%20part%2C%20seemed%20uncharacteristically%20at%20a%20loss%20for%20words.%20He%20couldn't%20reconcile%20the%20girl%20who%20had%20just%20stood%20up%20for%20him%20with%20the%20image%20of%20the%20confident%20and%20intimidating%20prefect.*%0A%0A*Finally%2C%20he%20found%20his%20voice%2C%20breaking%20the%20silence.*%0A%0A%22You...%20defended%20me.%22"}]}]}`);
+
+            // If history is 1 length long, that means we don't need drawer to switch
+            // Also means this can be conversation download
+            if (historyData.history.length < 2) {
+                openDrawerBtn.remove();
+            }
+
+            // Write character name on top
+            document.querySelector('.character_name-cont h3').textContent = historyData.charName;
+
+            // Get elements for future use
+            const historyList = document.getElementById('history_list');
+            const chat = document.getElementById('chat');
+            const msgItemTemplate = document.getElementById('message_item_template');
+
+            // Get and write the first chat
+            const openChat = (index) => {
+                chat.innerHTML = "";
+                historyData.history[index].chat.forEach(msg => {
+                    const clone = msgItemTemplate.content.cloneNode(true);
+
+                    // Check avatar
+                    const avatarGood = (msg.isUser && historyData.userPic) || (!msg.isUser && historyData.charPic);
+                    const avatar = avatarGood
+                        ? document.createElement('img')
+                        : document.createElement('div');
+                    if (avatarGood) {
+                        avatar.src = msg.isUser ? historyData.userPic : historyData.charPic;
+                    } else {
+                        avatar.classList.add(msg.isUser ? 'no_avatar-user' : 'no_avatar-char');
+                    }
+                    clone.querySelector('.avatar-wrap').appendChild(avatar);
+
+                    // Write content
+                    clone.querySelector('.chat_content-wrap h5').textContent = msg.name;
+                    clone.querySelector('.message-wrap p').innerHTML = parseMessageText(decodeURIComponent(msg.message));
+                    chat.appendChild(clone);
+                });
+            }
+            openChat(0);
+
+            // Get and write chat list in the drawer
+            historyData.history.forEach((chat, index) => {
+                const historyItem = document.createElement('div');
+                historyItem.classList.add('history_item');
+                // Open chat when clicked
+                historyItem.addEventListener('click', () => {
+                    openChat(index);
+                    closeDrawer();
+                });
+                const historyContent = document.createElement('p');
+                historyContent.innerHTML = `<span class="chat-date">${formatDate(chat.date)}</span><br /><br />` + parseMessageText(decodeURIComponent(chat.chat[chat.chat.length - 1].message));
+                historyItem.appendChild(historyContent);
+                historyList.appendChild(historyItem);
+            });
+
+            function parseMessageText(message) {
+                // Clean up memory reminders (second check)
+                message = message.replace(memoryRegex, '');
+                // Replace ***text*** with bold-italic
+                message = message.replace(/\*\*\*([\s\S]*?)\*\*\*/g, '<span class="bold-italic">$1</span>');
+                // Replace **text** with bold
+                message = message.replace(/\*\*([\s\S]*?)\*\*/g, '<span class="bold">$1</span>');
+                // Replace *text* with italic
+                message = message.replace(/\*([\s\S]*?)\*/g, '<span class="italic">$1</span>');
+                // Trim and then Replace newlines (\n) with line breaks (<br>)
+                message = message.trim().replace(/\n/g, '<br>');
+                return message;
+            }
+
+            function formatDate(dateString) {
+                const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+                const date = new Date(dateString);
+                const year = date.getFullYear();
+                const monthIndex = date.getMonth();
+                const monthName = months[monthIndex];
+                const day = String(date.getDate()).padStart(2, '0');
+                const hour = String(date.getHours()).padStart(2, '0');
+                const minute = String(date.getMinutes()).padStart(2, '0');
+
+                return `${year} ${monthName} ${day} - ${hour}:${minute}`;
+            }
+        }, false);
+    </script>
+
+</body>
+
+</html>
