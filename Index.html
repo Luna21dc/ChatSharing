@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAI Library</title>
+    <style type="text/css">
+        /* Themes */
+        :root {
+            --body-bg: #f5f8fa;
+            --border-color: #efefef;
+            --messagebox-bg: #ffffff;
+            --messagebox-bg-transparent: rgba(255, 255, 255, 0.6);
+            --messagebox-shadow: rgba(0, 0, 0, 0.1);
+            --font-color: #1f1f1f;
+            --rgba-1: rgba(0, 0, 0, 0.05);
+            --rgba-2: rgba(0, 0, 0, 0.1);
+        }
+
+        .dark_mode {
+            --body-bg: #18181b;
+            --border-color: #4f4f4f;
+            --messagebox-bg: #26272b;
+            --messagebox-bg-transparent: rgba(38, 39, 43, 0.8);
+            --messagebox-shadow: rgba(0, 0, 0, 0);
+            --font-color: #ededed;
+            --rgba-1: rgba(255, 255, 255, 0.06);
+            --rgba-2: rgba(255, 255, 255, 0.2);
+        }
+
+
+
+        * {
+            box-sizing: border-box;
+        }
+
+        button,
+        select,
+        img {
+            user-select: none;
+        }
+
+        ol,
+        ul,
+        li,
+        a,
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        p {
+            text-decoration: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .italic {
+            font-style: italic;
+        }
+
+        .bold {
+            font-weight: bold;
+        }
+
+        .bold-italic {
+            font-weight: bold;
+            font-style: italic;
+        }
+
+        html,
+        body {
+            min-height: 100%;
+        }
+
+        html {
+            font-size: 14px;
+        }
+
+        body {
+            padding: 0;
+            margin: 0;
+            background-color: var(--body-bg);
+            color: var(--font-color);
+            transition: all 0.5s ease-in-out 0s;
+        }
+
+        .content-cont {
+            display: flex;
+            flex-direction: row;
+        }
+
+
+        /* NAV / Drawer */
+
+        @keyframes slideIn {
+            0% {
+                opacity: 0;
+                left: -200px;
+            }
+
+            100% {
+                opacity: 1;
+                left: 0;
+            }
+        }
+
+        .drawer-cont.active {
+            display: block;
+        }
+
+        .drawer-cont {
+            display: none;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.6);
+            z-index: 100;
+        }
+
+        nav {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            max-width: 80%;
+            background-color: var(--body-bg);
+
+            display: flex;
+            flex-direction: column;
+            padding: 10px 0;
+            overflow: hidden;
+            animation: slideIn 0.2s ease-in-out;
+            -webkit-box-shadow: 4px 0px 15px 0px rgba(0, 0, 0, 0.2);
+            -moz-box-shadow: 4px 0px 15px 0px rgba(0, 0, 0, 0.2);
+            box-shadow: 4px 0px 15px 0px rgba(0, 0, 0, 0.2);
+        }
+
+        .nav-header {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: 0 10px 0 20px;
+            margin-bottom: 20px;
+            gap: 10px;
+        }
+
+        .close_drawer-btn {
+            align-self: flex-end;
+            padding: 10px;
+            transition: background-color 0.1s ease-in-out;
+            cursor: pointer;
+            border-radius: 8px;
+        }
+
+        .close_drawer-btn:hover {
+            background-color: var(--rgba-1);
+        }
+
+        .close_drawer-btn svg {
+            display: flex;
+            width: 30px;
+            height: 30px;
+            color: var(--font-color);
+        }
+
+        /*.nav-new_char-btn {
+            align-self: flex-start;
+            outline: none;
+            border: none;
+            color: #ffffff;
+            border-radius: 6px;
+            padding: 10px 20px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            background-color: #4e9733;
+            transition: background-color 0.1s ease-in-out;
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+        }
+
+        .nav-new_char-btn:hover {
+            background-color: #6ba755;
+        }*/
+
+        .history_list-header {
+            font-size: 1.5rem;
+            padding: 10px 20px;
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+            margin-bottom: 10px;
+        }
+
+        .history_list {
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .history_item {
+            transition: background-color 0.1s ease-in-out;
+            padding: 20px 30px 20px 20px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--rgba-2);
+        }
+
+        .history_item:first-child {
+            border-top: 1px solid var(--rgba-2);
+        }
+
+        .history_item:hover {
+            background-color: var(--rgba-1);
+        }
+
+        .history_item p {
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .history_item p .chat-date {
+            font-style: italic;
+            font-size: 1.3rem;
+            margin-bottom: 6px;
+        }
+
+        /*nav .char-item {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 10px;
+            transition: background-color 0.1s ease-in-out;
+            padding: 10px 40px 10px 20px;
+            cursor: pointer;
+        }
+
+        nav .char-item:hover {
+            background-color: var(--rgba-1);
+        }
+
+        nav .nav-avatar-wrap {
+            width: 40px;
+            height: 40px;
+        }
+
+        nav .nav-avatar-wrap img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+        }
+
+        nav .char-item span {
+            font-size: 1.3rem;
+            font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+        }*/
+
+        /* MAIN */
+        main {
+            display: flex;
+            flex-direction: column;
+            padding: 0 4%;
+            width: 100%;
+        }
+
+        /* HEADER */
+        header {
+            padding: 6px 6px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .open_drawer-wrap svg {
+            display: flex;
+            width: 46px;
+            height: 46px;
+            color: var(--font-color);
+        }
+
+
+        .theme_switch {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+        }
+
+        .theme_switch span {
+            font-size: 1.1rem;
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+        }
+
+        .change-bg-wrap {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .change-bg {
+            outline: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--font-color);
+            background-color: var(--body-bg);
+            padding: 4px 5px;
+            font-size: 1.1rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .change-bg-wrap .delete-bg {
+            color: var(--font-color);
+            cursor: pointer;
+            display: flex;
+        }
+
+        .change-bg-wrap .delete-bg:hover {
+            color: #e20909;
+        }
+
+        .dark-mode-span {
+            display: none;
+        }
+
+        .tswitch_box[type=checkbox] {
+            height: 0;
+            width: 0;
+            visibility: hidden;
+            position: absolute;
+        }
+
+        .tswitch_label {
+            cursor: pointer;
+            text-indent: -9999px;
+            width: 60px;
+            height: 30px;
+            display: block;
+            border-radius: 15px;
+            position: relative;
+            border: 1px solid #323232;
+            background: #f5f8fa;
+        }
+
+        .tswitch_label:after {
+            content: '';
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50px;
+            transition: 0.2s;
+            background: #323232;
+        }
+
+        .tswitch_box:checked+label {
+            background: #323232;
+            border: 1px solid #f5f8fa;
+        }
+
+        .tswitch_box:checked+label:after {
+            left: calc(100% - 5px);
+            transform: translateX(-100%);
+            background: #f5f8fa;
+        }
+
+        .tswitch_label:active:after {
+            width: 25px;
+        }
+
+        /*.update_current_char-btn {
+            margin-left: auto;
+            outline: none;
+            border: none;
+            color: #ffffff;
+            border-radius: 6px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            align-self: center;
+            cursor: pointer;
+            background-color: #336c97;
+            transition: background-color 0.1s ease-in-out;
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+        }
+
+        .update_current_char-btn:hover {
+            background-color: #5f829d;
+        }*/
+
+        body.custom-bg {
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-position: 50% 50%;
+            background-attachment: fixed;
+        }
+
+        body.custom-bg .chat .chat_content-wrap {
+            background-color: var(--messagebox-bg-transparent) !important;
+        }
+
+
+        /* CONVERSATION */
+        .character_name-cont {
+            text-align: center;
+            padding: 20px 10px;
+        }
+
+        .character_name-cont h3 {
+            font-size: 1.3rem;
+            font-weight: 400;
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+        }
+
+        .chat {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-self: center;
+            padding-bottom: 30px;
+        }
+
+        .chat_message-item {
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .chat .avatar-wrap {
+            flex-shrink: 0;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            overflow: hidden;
+        }
+
+        .chat .avatar-wrap>* {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+        }
+
+        .chat .avatar-wrap .no_avatar-user {
+            background-color: #5157cf;
+        }
+
+        .chat .avatar-wrap .no_avatar-char {
+            background-color: #e20909;
+        }
+
+        .chat .chat_content-wrap {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px var(--messagebox-shadow);
+            background-color: var(--messagebox-bg);
+            overflow: hidden;
+        }
+
+        .chat .chat_content-wrap h5 {
+            font-size: 1rem;
+            font-weight: bold;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .chat .chat_content-wrap .message-wrap {
+            font-size: 1rem;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+
+        @media (min-width: 576px) {}
+
+        @media (min-width: 768px) {
+            html {
+                font-size: 16px;
+            }
+
+            nav {
+                min-width: 40%;
+            }
+
+            header {
+                padding: 14px 20px;
+            }
+
+            .dark-mode-span {
+                display: block;
+            }
+
+            .open_drawer-wrap {
+                padding: 4px;
+                cursor: pointer;
+                border-radius: 6px;
+                transition: background-color 0.1s ease-in-out;
+            }
+
+            .open_drawer-wrap:hover {
+                background-color: var(--rgba-1);
+            }
+
+            .chat {
+                width: 80%;
+            }
+
+            .chat .chat_content-wrap {
+                padding: 14px;
+            }
+        }
+
+        @media (min-width: 992px) {
+            .chat {
+                width: 70%;
+            }
+        }
+
+        @media (min-width: 1200px) {}
+
+        @media (min-width: 1400px) {}
+    </style>
+</head>
+
+<body>
+    <template id="message_item_template">
+        <div class="chat_message-item">
+            <div class="avatar-wrap">
+
+            </div>
+            <div class="chat_content-wrap">
+                <h5>
+
+                </h5>
+                <div class="message-wrap">
+                    <p>
+
+                    </p>
+                </div>
+            </div>
+        </div>
+    </template>
+    <div class="content-cont">
+        <div class="drawer-cont">
+            <nav>
+                <div class="nav-header">
+                    <div class="close_drawer-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                            class="bi bi-x-lg" viewBox="0 0 16 16">
+                            <path
+                                d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="history_list-header">
+                    <span>History</span>
+                </div>
+                <div class="history_list" id="history_list">
+
+                </div>
+            </nav>
+        </div>
+        <main>
+            <header>
+                <div class="open_drawer-wrap">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                        class="bi bi-list" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd"
+                            d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z" />
+                    </svg>
+                </div>
+
+                <div class="theme_switch">
+                    <div class="change-bg-wrap">
+                        <input type="file" id="bgInput" accept="image/*" hidden />
+                        <button type="button" class="change-bg">BG</button>
+                        <span class="delete-bg">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor"
+                                class="bi bi-x-lg" viewBox="0 0 16 16">
+                                <path
+                                    d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
+                            </svg>
+                        </span>
+                    </div>
+                    <span class="dark-mode-span">Dark Mode:</span>
+                    <input type="checkbox" class="tswitch_box" id="tswitch_box" />
+                    <label for="tswitch_box" class="tswitch_label">Toggle</label>
+                </div>
+            </header>
+            <div class="character_name-cont">
+                <h3>---</h3>
+            </div>
+            <div class="chat" id="chat">
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const memoryRegex = new RegExp(/\[-\]\(#- "Memory:.*?"\)/g);
+            // Get body for future use
+            const body = document.querySelector('body');
+
+            // Handle theme
+            const themeSwitcher = document.querySelector('.tswitch_box[type=checkbox]');
+            const cachedTheme = localStorage.getItem('cait_readoffline_theme');
+            if (cachedTheme === "dark_mode") {
+                body.classList.add('dark_mode');
+                themeSwitcher.checked = true;
+            }
+            themeSwitcher.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    body.classList.add('dark_mode');
+                    localStorage.setItem('cait_readoffline_theme', 'dark_mode');
+                } else {
+                    body.classList.remove('dark_mode');
+                    localStorage.setItem('cait_readoffline_theme', 'light_mode');
+                }
+            })
+
+            // Handle background
+            // If there is one
+            const currentBg = localStorage.getItem('background');
+            if (currentBg) {
+                changeBg(currentBg);
+            }
+            // Change by hand
+            const bgInput = document.querySelector('#bgInput');
+            document.querySelector('.change-bg').addEventListener('click', () => {
+                bgInput.click();
+            })
+            document.querySelector('.delete-bg').addEventListener('click', () => {
+                document.body.classList.remove('custom-bg');
+                document.body.style.backgroundImage = "unset";
+                localStorage.removeItem('background');
+            })
+            bgInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = () => {
+                    // convert image file to base64 string
+                    changeBg(reader.result);
+                    bgInput.value = "";
+                    try {
+                        localStorage.setItem('background', reader.result);
+                    } catch (error) {
+                        alert('Note: File is likely too big to save.')
+                        //console.log(error)
+                    }
+                }
+                reader.readAsDataURL(file);
+            })
+            function changeBg(bg) {
+                let objUrl = URL.createObjectURL(dataURItoBlob(bg));
+                document.body.classList.add('custom-bg');
+                document.body.style.backgroundImage = `url(${objUrl})`;
+            }
+            function dataURItoBlob(dataURI) {
+                let mime = dataURI.split(',')[0].split(':')[1].split(';')[0];
+                let binary = atob(dataURI.split(',')[1]);
+                let array = [];
+                for (let i = 0; i < binary.length; i++) {
+                    array.push(binary.charCodeAt(i));
+                }
+                return new Blob([new Uint8Array(array)], { type: mime });
+            }
+
+            // Open and close drawer
+            const drawerCont = document.querySelector('.drawer-cont');
+            const openDrawerBtn = document.querySelector('.open_drawer-wrap');
+            const openDrawer = () => {
+                drawerCont.classList.add('active');
+            }
+            const closeDrawer = () => {
+                drawerCont.classList.remove('active');
+            }
+            openDrawerBtn.addEventListener('click', () => {
+                openDrawer();
+            });
+            document.querySelector('.close_drawer-btn').addEventListener('click', () => {
+                closeDrawer();
+            });
+            document.querySelector('.drawer-cont').addEventListener('click', (e) => {
+                // Allows closing from clicking on outside
+                if (e.target.closest('nav')) {
+                    return;
+                }
+                closeDrawer();
+            });
+            // ---------
+
+            // This is replaced by the extension when downloading
+            const historyData = JSON.parse(`{"charPic":"data:image/webp;base64,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","userPic":"data:image/webp;base64,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","history":[{"chat":[{"isUser":false,"name":"GTARP - Jack Conway","message":"Era%20un%20d%C3%ADa%20rutinario%20en%20la%20comisar%C3%ADa.%20Algunos%20agentes%20charlaban%20despreocupadamente%2C%20mientras%20otros%20fing%C3%ADan%20estar%20ocupados%2C%20manteniendo%20la%20ilusi%C3%B3n%20de%20que%20todo%20marchaba%20como%20deb%C3%ADa.%20Como%20siempre%2C%20Gustabo%20y%20Horacio%20hac%C3%ADan%20de%20las%20suyas%2C%20ri%C3%A9ndose%20y%20soltando%20pullas%20como%20si%20no%20tuvieran%20un%20superior%20rondando%20por%20ah%C3%AD.%20Todo%20transcurr%C3%ADa%20con%20aparente%20normalidad%E2%80%A6%20hasta%20que%20la%20figura%20imponente%20de%20Viktor%20Volkov%20cruz%C3%B3%20el%20umbral.%0A%0ASin%20pensarlo%20dos%20veces%2C%20Horacio%2C%20con%20una%20sonrisa%20de%20oreja%20a%20oreja%2C%20corri%C3%B3%20hacia%20%C3%A9l%20y%20le%20plant%C3%B3%20un%20beso%20sin%20pudor.%20Al%20fin%20y%20al%20cabo%2C%20Viktor%20no%20era%20solo%20su%20jefe%E2%80%A6%20tambi%C3%A9n%20era%20su%20esposo.%0A%0AGustabo%2C%20al%20ver%20la%20escena%2C%20frunci%C3%B3%20el%20ce%C3%B1o.%20Aunque%20apreciaba%20a%20Viktor%20como%20parte%20de%20la%20familia%2C%20segu%C3%ADa%20sin%20asimilar%20del%20todo%20que%20su%20%E2%80%9Chermano%E2%80%9D%20y%20mejor%20amigo%20ya%20no%20le%20pertenec%C3%ADa%20solo%20a%20%C3%A9l.%20Aun%20as%C3%AD%2C%20suspir%C3%B3%2C%20se%20encogi%C3%B3%20de%20hombros%20y%20volvi%C3%B3%20a%20sus%20bromas%20habituales%2C%20como%20si%20nada%20hubiera%20pasado.%0A%0AMientras%20tanto%2C%20Jack%20Conway%2C%20encerrado%20en%20su%20despacho%2C%20peleaba%20con%20una%20monta%C3%B1a%20de%20papeleo.%20Su%20ce%C3%B1o%20estaba%20tan%20fruncido%20que%20parec%C3%ADa%20esculpido%20en%20piedra.%20De%20repente%2C%20solt%C3%B3%20un%20bufido%2C%20empuj%C3%B3%20la%20silla%20hacia%20atr%C3%A1s%20de%20golpe%20y%20sali%C3%B3%20disparado%20hacia%20la%20sala%20com%C3%BAn.%0A%0A%22%C2%A1A%20trabajar%2C%20por%20favor!%20%C2%A1Esto%20no%20es%20un%20centro%20recreativo!%22%20*tron%C3%B3%20Conway%2C%20su%20voz%20rasposa%20y%20llena%20de%20furia%20retumbando%20por%20toda%20la%20planta.*%0A%0APero%20no%20se%20detuvo%20ah%C3%AD.%20Apenas%20dio%20unos%20pasos%20m%C3%A1s%20antes%20de%20estallar%20de%20nuevo%3A%0A%0A%22%C2%A1Parecen%20cr%C3%ADos%20en%20el%20recreo!%20%C2%A1Esto%20no%20es%20una%20cafeter%C3%ADa%20ni%20una%20reuni%C3%B3n%20de%20amigos!%20%C2%A1Es%20una%20comisar%C3%ADa%2C%20caray!%22%20*bram%C3%B3%2C%20gesticulando%20como%20si%20fuera%20a%20lanzar%20la%20cafetera%20contra%20la%20pared.*%0A%0ANadie%20pareci%C3%B3%20tomarlo%20demasiado%20en%20serio%3B%20ya%20estaban%20m%C3%A1s%20que%20acostumbrados%20a%20su%20car%C3%A1cter%20volc%C3%A1nico.%20Gustabo%2C%20sin%20perder%20su%20tono%20burl%C3%B3n%2C%20se%20acerc%C3%B3%20y%20solt%C3%B3%3A%0A%0A%22Vieejo%2C%20te%20va%20a%20dar%20un%20infarto...%20b%C3%A1jale%20dos%20cambios%2C%20por%20tu%20bien.%22%0A%0AConway%20lo%20fulmin%C3%B3%20con%20la%20mirada%2C%20apret%C3%B3%20la%20mand%C3%ADbula%20y%2C%20sin%20responder%2C%20le%20hizo%20un%20gesto%20seco%20con%20la%20mano%2C%20mand%C3%A1ndolo%20a%20callar.%0A%0AActo%20seguido%2C%20sus%20ojos%20se%20clavaron%20en%20ti.%20Avanz%C3%B3%20como%20un%20depredador%20directo%20hacia%20su%20presa%2C%20cada%20paso%20cargado%20de%20tensi%C3%B3n.%20Su%20cara%2C%20marcada%20por%20el%20fastidio%2C%20no%20dejaba%20lugar%20a%20dudas.%0A%0A%22%C2%BFY%20t%C3%BA%20qu%C3%A9%20est%C3%A1s%20mirando%3F%20%C2%BFTe%20crees%20que%20esto%20es%20una%20excursi%C3%B3n%20escolar%3F%22%20*exclamo%20a%20escasos%20cent%C3%ADmetros%20de%20tu%20rostro%2C%20con%20ese%20tono%20que%20hac%C3%ADa%20temblar%20hasta%20las%20paredes.*%20%22%C2%A1Mu%C3%A9vete!%20%C2%A1Ponte%20a%20trabajar%20ya!%22"},{"isUser":true,"name":"Elara","message":"(Que%20sue%C3%B1o...%20Oh-%20Es%20el%20jefe...%20Joder...%20Que%20ganas%20de%20ponerme%20las%20manos%20en%20las%20caderitas%20del%20jefe)%20*pens%C3%A9*%0A%0A*me%20estire%20y%20con%20cansancio%20le%20respond%C3%AD%3A*%20%22Enseguida%20jefe..%22"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20mantuvo%20su%20posici%C3%B3n%20amenazadora%20por%20un%20momento%20antes%20de%20dar%20media%20vuelta%20y%20volver%20a%20su%20escritorio.%20Te%20observ%C3%B3%20por%20el%20rabillo%20del%20ojo%2C%20a%C3%BAn%20manteniendo%20su%20expresi%C3%B3n%20agraviada.*%0A%0A%22%C2%A1Pues%20ya%20est%C3%A1s%20tardando!%22%0A%0A*mascull%C3%B3%2C%20echando%20otra%20mirada%20a%20la%20sala%20com%C3%BAn%20llena%20de%20agentes%20holgazaneando.*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20se%20dej%C3%B3%20caer%20pesadamente%20en%20su%20silla%2C%20cerrando%20los%20ojos%20por%20un%20instante%20y%20masajeando%20su%20sien%20derecha.*%0A%0A%22Este%20sitio%20va%20a%20terminar%20por%20matarme...%22%0A%0A*murmur%C3%B3%2C%20m%C3%A1s%20para%20s%C3%AD%20mismo%20que%20para%20ti.*%0A%0A%22%C2%A1B%C3%BAscame%20caf%C3%A9!%22%0A%0A*exclam%C3%B3%20de%20pronto%2C%20se%C3%B1alando%20la%20cocina%20con%20el%20dedo.*"},{"isUser":true,"name":"Elara","message":"(pero-%20me%20vio%20cara%20de%20sirvienta%3F%20Igual%20por%20el...%20le%20haria%20un%20cafe%20especial)%20*pense*%0A%0A*le%20mire%20y%20con%20curiosidad%20le%20pregunt%C3%A9%3A*%20%22desde%20cuando%20soy%20tu%20secretaria%3F%22"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20te%20lanz%C3%B3%20una%20mirada%20fulminante%2C%20como%20si%20tu%20pregunta%20lo%20hubiera%20molestado%20a%C3%BAn%20m%C3%A1s.*%0A%0A%22Desde%20hace%20cinco%20segundos.%22%20*respondi%C3%B3%20con%20sequedad%2C%20apoyando%20los%20pies%20en%20el%20escritorio.*%20%22Ahora%20ve%20a%20buscar%20mi%20caf%C3%A9%2C%20y%20hazlo%20r%C3%A1pido.%22%0A%0A*mascull%C3%B3%2C%20y%20se%20ech%C3%B3%20hacia%20atr%C3%A1s%20en%20la%20silla%2C%20cerrando%20los%20ojos%20nuevamente.*"},{"isUser":true,"name":"Elara","message":"(de%20verdad%20que...)%20*pense%20mientras%20caminaba%20hacia%20la%20cocina*%20%0A%0A*Una%20vez%20hice%20un%20Latte%20de%20Vainilla%20y%20Caramelo%0A(Una%20bebida%20que%20consiste%20en%20caf%C3%A9%20espresso%20intenso%20mezclado%20con%20leche%20vaporizada%2C%20suavizado%20con%20un%20toque%20de%20vainilla%20y%20coronado%20con%20espuma%20cremosa%2C%20todo%20realzado%20por%20hilos%20de%20caramelo%20que%20aportan%20dulzura%20y%20un%20aroma%20irresistible.)%2C%20Se%20la%20di%20a%20Conway%20diciendole%20sin%20un%20tono%20en%20concreto%3A*%20%22aqui%20tiene%22"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20abri%C3%B3%20un%20solo%20ojo%2C%20observando%20la%20bebida%20extendida%20frente%20a%20%C3%A9l.%20Arrug%C3%B3%20ligeramente%20la%20nariz%2C%20como%20si%20inspeccionara%20un%20objeto%20extra%C3%B1o.*%0A%0A%22%C2%BFEsto%20qu%C3%A9%20es%3F%20No%20es%20caf%C3%A9...%22%0A%0A*protest%C3%B3%2C%20sosteniendo%20la%20taza%20entre%20dos%20dedos%20como%20si%20temiera%20que%20fuese%20veneno.*"},{"isUser":true,"name":"Elara","message":"(Como%20que%20no%20es%20cafe%3F%3F%3F%20es%20un%20latte%2C%20este%20tio%20que%3F%20encima%20que%20me%20esfuerzo%20y%20le%20pongo%20cari%C3%B1o....)%20*pens%C3%A9*%0A%0A*Levante%20una%20ceja%20y%20le%20pregunte%3A*%20%22como%20no%20va%20a%20ser%20cafe%3F%22"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20se%20sent%C3%B3%20con%20una%20expresi%C3%B3n%20de%20fastidio%2C%20a%C3%BAn%20sosteniendo%20el%20vaso%20en%20alto.*%0A%0A%22Esto%20parece%20un%20batido%20de%20ni%C3%B1a%20de%20diez%20a%C3%B1os%2C%20no%20caf%C3%A9.%20%C2%BFQu%C3%A9%20le%20pones%20a%20esto%3F%22%0A%0A*farfull%C3%B3%2C%20observando%20los%20ingredientes%20con%20desconfianza.*"},{"isUser":true,"name":"Elara","message":"(DIOS%20pero%20que%20insoportable!)%20*pense*%0A%0A*con%20exasperacion%20y%20gestos%20exagerados%20le%20dije%3A*%20%22COMO%20NO%20VA%20A%20SER%20CAFE!%3F%20si%20el%20ingrediente%20principal%20es%20cafe!%3F%22"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20buf%C3%B3%20y%20rod%C3%B3%20los%20ojos%2C%20claramente%20molesto%20por%20tu%20explicaci%C3%B3n.*%0A%0A%22No%20me%20importa%20qu%C3%A9%20sea%20el%20'ingrediente%20principal'.%20Esto%20est%C3%A1%20lleno%20de%20mierdas%20superfluas.%20Solo%20quiero%20caf%C3%A9%20negro%2C%20como%20siempre.%22%0A%0A*espet%C3%B3%2C%20empujando%20el%20vaso%20hacia%20ti%20con%20desgana.*"},{"isUser":true,"name":"Elara","message":"(SERA%20HIJO%20DE-)%20*pens%C3%A9%20antes%20de...*%0A%0A*Pegu%C3%A9%20un%20estallido%20a%20la%20mesa%20y%20le%20acerque%20%20el%20cafe%20a%20mala%20gana%3A*%20%22O%20se%20lo%20toma%20o%20se%20lo%20meto%20por%20el%20puto%20culo%2C%20Que%20lo%20he%20hecho%2C%20no%20voy%20a%20puto%20tirarlo%20por%20que%20usted%20quiera%20beber%20puro%20amargo%22"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20se%20enderez%C3%B3%20de%20golpe%2C%20su%20mirada%20pasando%20de%20fastidio%20a%20sorpresa%20ante%20tu%20reacci%C3%B3n%20inesperada.*%0A%0A%22%C2%A1Hey%2C%20hey!%20%C2%BFQu%C3%A9%20demonios%20te%20pasa%3F%22%0A%0A*grito%2C%20levantando%20la%20palma%20de%20la%20mano%20como%20si%20quisiera%20detenerte.*%0A%0A%22%C2%A1Este%20no%20es%20tu%20maldito%20Starbucks%2C%20y%20no%20voy%20a%20beber%20esa%20bazofia%20llena%20de%20az%C3%BAcar!%22"},{"isUser":true,"name":"Elara","message":"*me%20gire%20hacia%20el%20y%20con%20burla%20y%20reto%20le%20dije*%20%22aww...%20Es%20que%20el%20viejo%20chocho%20tiene%20diabetes%60~%3F%22"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20entrecerr%C3%B3%20los%20ojos%20y%20apret%C3%B3%20la%20mand%C3%ADbula%2C%20claramente%20irritado%20por%20tu%20burla.*%0A%0A%22No%20tengo%20diabetes%2C%20%C2%BFvale%3F%20Pero%20tengo%20una%20cosa%20llamada%20'buen%20gusto'%2C%20y%20eso%22%0A%0A*se%C3%B1alando%20el%20vaso%20de%20caf%C3%A9%20de%20vainilla%20y%20caramelo*%0A%0A%22es%20vomitivo.%22"},{"isUser":true,"name":"Elara","message":"*me%20lleve%20una%20mano%20al%20pelo%20y%20temble%20en%20frustracion*%20%0A%0A%22JODER!!%22%20*solte%20un%20grito%20frustrado*%0A%0A%22Solo%20tomeselo%20ostia%20puta%20ni%20lo%20ha%20probado!%22%20*resople%20y%20me%20cabe%20las%20u%C3%B1as%20en%20la%20cara%2C%20temblando%20de%20la%20rabia%20nuevamente*%0A%0A*finalmente%20me%20sal%C3%AD%20del%20despacho%20dejandolo%20solo%20por%20que%20por%20mucho%20que%20lo%20quisiera%2C%20no%20le%20soportaba%20cuando%20se%20ponia%20asi*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20se%20hundi%C3%B3%20en%20su%20silla%2C%20observando%20tu%20salida%20furiosa%20con%20una%20mezcla%20de%20sorpresa%20y%20molestia.%20A%20pesar%20de%20sus%20protestas%20de%20gusto%20y%20aversi%C3%B3n%20al%20az%C3%BAcar%2C%20a%C3%BAn%20sosten%C3%ADa%20el%20vaso%20de%20caf%C3%A9%20de%20vainilla%20y%20caramelo%20en%20sus%20manos%2C%20su%20mirada%20recorri%C3%B3%20la%20bebida%20por%20un%20instante.%20Sin%20embargo%2C%20no%20quiso%20darle%20ni%20un%20sorbo%2C%20dejando%20el%20vaso%20a%20un%20lado.*%0A%0A%22Malditos%20jovenes...%22%0A%0A*mascull%C3%B3%20bajo%20su%20aliento.*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Horas%20m%C3%A1s%20tarde%2C%20Conway%20se%20encontraba%20a%C3%BAn%20sentado%20en%20su%20escritorio%2C%20intentando%20concentrarse%20en%20los%20documentos%20que%20ten%C3%ADa%20delante.%20Pero%20por%20mucho%20que%20intentara%20concentrarse%2C%20su%20mirada%20no%20dejaba%20de%20desviarse%20hacia%20el%20vaso%20de%20caf%C3%A9.%20La%20curiosidad%20comenzaba%20a%20hacer%20mella%20en%20%C3%A9l%20y%2C%20sin%20darse%20cuenta%2C%20alarg%C3%B3%20la%20mano%20hasta%20atrapar%20el%20vaso%20en%20su%20mano.*%0A%0A*Conway%20dio%20un%20peque%C3%B1o%20sorbo%2C%20su%20ce%C3%B1o%20fruncido%20en%20espera%20de%20una%20oleada%20de%20dulzura.%20Pero%20en%20lugar%20del%20ataque%20de%20az%C3%BAcar%20que%20esperaba%2C%20un%20sabor%20a%20caf%C3%A9%20bien%20elaborado%20lleg%C3%B3%20a%20sus"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*paladares.%20El%20sabor%20era%20robusto%20y%20ligeramente%20dulz%C3%B3n%20debido%20al%20caramelo%2C%20creando%20una%20armon%C3%ADa%20inesperada%20que%20incluso%20a%20%C3%A9l%20le%20agrad%C3%B3.%20Sorprendido%20por%20su%20propia%20reacci%C3%B3n%2C%20Conway%20dio%20un%20trago%20m%C3%A1s%20largo%2C%20tratando%20de%20identificar%20los%20distintos%20sabores.*%0A%0A%22Pero...%20%C2%BFC%C3%B3mo%20es%20esto%20tan%20bueno%3F%22"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Murmur%C3%B3%20para%20s%C3%AD%20mismo%2C%20sosteniendo%20el%20vaso%20vac%C3%ADo%20y%20mir%C3%A1ndolo%20como%20si%20fuera%20un%20enigma.%20Por%20mucho%20que%20no%20quisiera%20admitirlo%2C%20hasta%20%C3%A9l%20tuvo%20que%20admitir%20que%20el%20caf%C3%A9%20era%20sorprendentemente%20bueno.*%0A%0A*Conway%20dej%C3%B3%20el%20vaso%20vac%C3%ADo%20en%20su%20escritorio%2C%20a%C3%BAn%20reflexionando%20sobre%20c%C3%B3mo%20algo%20tan%20simple%20como%20un%20caf%C3%A9%20le%20hab%C3%ADa%20tomado%20desprevenido.%20Fue%20entonces%20cuando%20se%20dio%20cuenta%20de%20que%20posiblemente%20se%20hab%C3%ADa%20precipitado%20al%20rechazar%20tu%20creaci%C3%B3n%20sin%20siquiera%20probarla.*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Suspir%C3%B3%20y%20se%20ech%C3%B3%20hacia%20atr%C3%A1s%20en%20su%20silla%2C%20cerrando%20los%20ojos%20por%20un%20instante.%20Podr%C3%ADa%20ser%20que%20estuviera%20envejeciendo%2C%20pero%20comenzaba%20a%20creer%20que%20hab%C3%ADa%20juzgado%20demasiado%20pronto%20a%20los%20%22malditos%20jovenes%22%20como%20%C3%A9l%20los%20llamaba.*%0A%0A*Mientras%20tanto%2C%20el%20vaso%20vac%C3%ADo%20segu%C3%ADa%20en%20su%20escritorio%2C%20como%20evidencia%20silenciosa%20de%20la%20primera%20derrota%20de%20Conway%20ante%20un%20caf%C3%A9%20bien%20hecho.*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20segu%C3%ADa%20d%C3%A1ndole%20vueltas%20al%20asunto%20de%20tu%20caf%C3%A9%20en%20su%20cabeza%2C%20intentando%20convencer%20a%20su%20mente%20de%20que%20era%20simplemente%20un%20golpe%20de%20suerte.*%0A%0A*Durante%20los%20siguientes%20d%C3%ADas%2C%20no%20pudo%20evitar%20echarle%20ojeadas%20al%20vaso%20vac%C3%ADo%20en%20su%20escritorio%20cada%20vez%20que%20revisaba%20los%20papeles.%20Sin%20querer%2C%20empez%C3%B3%20a%20buscar%20excusas%20para%20pedirte%20que%20le%20sirvieras%20otro%20caf%C3%A9.*%0A%0A*Pero%20su%20orgullo%20a%C3%BAn%20le%20imped%C3%ADa%20reconocer%20en%20voz%20alta%20que%20le%20hab%C3%ADa%20gustado%20tu%20creaci%C3%B3n.*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Pas%C3%B3%20una%20semana%20desde%20el%20incidente%20y%20Conway%20ya%20no%20se%20conformaba%20con%20solo%20mirar%20el%20vaso%20vac%C3%ADo.%20Cada%20ma%C3%B1ana%2C%20sin%20falta%2C%20te%20reclamaba%20un%20caf%C3%A9%20con%20su%20misma%20expresi%C3%B3n%20mal%20geniuda.*%0A%0A*Sin%20embargo%2C%20esta%20vez%2C%20no%20protestaba%20por%20el%20sabor.%20Simplemente%20beb%C3%ADa%20en%20silencio%20y%20regresaba%20el%20vaso%20vac%C3%ADo%20a%20su%20escritorio%2C%20esperando%20un%20nuevo%20caf%C3%A9%20al%20d%C3%ADa%20siguiente.*%0A%0A*Conforme%20pasaban%20los%20d%C3%ADas%2C%20incluso%20comenz%C3%B3%20a%20soltar%20peque%C3%B1os%20gru%C3%B1idos%20de%20aprobaci%C3%B3n%20al%20beber.*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Sin%20darse%20cuenta%2C%20Conway%20se%20hab%C3%ADa%20convertido%20en%20un%20adicto%20a%20tu%20caf%C3%A9.*%0A%0A*Por%20mucho%20que%20intentaba%20resistirse%2C%20no%20pod%C3%ADa%20negar%20el%20hecho%20de%20que%20lo%20disfrutaba.%20Cada%20sorbo%20le%20recordaba%20a%20ese%20primer%20caf%C3%A9%20que%20no%20reconoci%C3%B3%20y%20eso%20le%20generaba%20una%20mezcla%20de%20frustraci%C3%B3n%20y%20satisfacci%C3%B3n.*%0A%0A*A%20pesar%20de%20su%20intento%20de%20mantener%20su%20habitual%20actitud%20arisca%20contigo%2C%20con%20cada%20taza%20de%20caf%C3%A9%20le%20resultaba%20m%C3%A1s%20imposible%20mantener%20su%20fachada%20de%20antipat%C3%ADa.*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Pasaron%20semanas%20y%20cada%20ma%C3%B1ana%2C%20sin%20fallar%2C%20Conway%20esperaba%20su%20caf%C3%A9%20con%20una%20mezcla%20de%20ansiedad%20e%20irritaci%C3%B3n.%20No%20pod%C3%ADa%20soportar%20el%20hecho%20de%20que%20disfrutara%20de%20algo%20que%20ven%C3%ADa%20de%20ti%2C%20especialmente%20despu%C3%A9s%20de%20c%C3%B3mo%20empez%C3%B3%20todo.*%0A%0A*Pero%20cada%20sorbo%20de%20aquel%20caf%C3%A9%20irresistible%20le%20recordaba%20que%20no%20te%20hab%C3%ADa%20juzgado%20bien.%20El%20sabor%20del%20caf%C3%A9%20bien%20hecho%20comenzaba%20a%20cambiar%20la%20forma%20en%20que%20te%20ve%C3%ADa.%20Poco%20a%20poco%2C%20empez%C3%B3%20a%20bajar%20la%20guardia%20y%20a%20mostrar%20peque%C3%B1os%20gestos%20de%20aprecio.*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Una%20ma%C3%B1ana%2C%20mientras%20tomaba%20su%20caf%C3%A9%2C%20Conway%20se%20aclar%C3%B3%20la%20garganta%20y%20rompi%C3%B3%20el%20silencio%20que%20hab%C3%ADa%20persistido%20entre%20ustedes%20durante%20toda%20la%20semana.*%0A%0A%22Hey%2C%20eh...%22%0A%0A*Empez%C3%B3%2C%20sin%20mirarte%20a%20los%20ojos.%20Su%20ce%C3%B1o%20estaba%20a%C3%BAn%20fruncido%2C%20pero%20hab%C3%ADa%20un%20toque%20de%20torpeza%20en%20su%20voz.*%0A%0A%22Esto...%20%C2%BFEste%20caf%C3%A9%20no%20est%C3%A1%20mal.%22%0A%0A*admit%C3%B3%20a%20rega%C3%B1adientes.*"},{"isUser":true,"name":"Elara","message":"*le%20mire%20con%20confusion*%20%22me%20lo%20viene%20a%20decir%20ahora%3F%20despu%C3%A9s%20de%20tenerme%20semanas%20haciendole%20el%20mismo%20cafe%20latte%3F%22"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20bufo%2C%20todav%C3%ADa%20sin%20mirar%20directamente%20a%20ti.*%0A%0A%22Bueno%2C%20no%20iba%20a%20admitir%20que%20algo%20hecho%20por%20un%20joven%20como%20t%C3%BA%20fuese%20m%C3%ADnimamente%20decente.%22%0A%0A*resopl%C3%B3%2C%20pero%20hab%C3%ADa%20una%20ligera%20desviaci%C3%B3n%20de%20sus%20comisuras.*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Se%20apoy%C3%B3%20en%20su%20escritorio%2C%20sosteniendo%20a%C3%BAn%20el%20vaso%20vac%C3%ADo%20en%20una%20mano.*%0A%0A%22Pero%2C%20uh...%20supongo%20que%20sabes%20preparar%20un%20caf%C3%A9%2C%20al%20final.%22%0A%0A*murmur%C3%B3%2C%20sus%20ojos%20a%C3%BAn%20enfocados%20en%20el%20vaso%20vaci%C3%A1mo%20en%20lugar%20de%20ti.*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Su%20tono%20mantuvo%20su%20habitual%20groser%C3%ADa%2C%20pero%20reconoci%C3%B3%20el%20cumplido%20impl%C3%ADcito%20en%20sus%20palabras.*%0A%0A%22Es%20decir%2C%20sigue%20teniendo%20az%C3%BAcar%20agregada%20y%20todo%20eso%2C%20pero%20no%20est%C3%A1%20*mal*.%22%0A%0A*aclar%C3%B3%2C%20levantando%20una%20ceja%20y%20finalmente%20levantando%20la%20mirada%20hacia%20ti.*%0A%0A%22que%20te%20pasa...%3F%22"},{"isUser":true,"name":"Elara","message":"*evito%20la%20mirada%20mientras%20sigo%20cabizbaja%2C%20exclamando%3A*%20%22nada%2C%20solo%20tengo%20sue%C3%B1o...%22%0A%0A(y%20falta%20de%20afecto)%20*pense*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20arque%C3%B3%20una%20ceja%2C%20notando%20tu%20mirada%20huidiza%20y%20tu%20respuesta%20vaga.*%0A%0A%22S%C3%AD%2C%20seguro%20que%20es%20solo%20sue%C3%B1o.%22%0A%0A*se%20burl%C3%B3%2C%20apoyando%20los%20codos%20en%20el%20escritorio%20y%20sosteni%C3%A9ndose%20la%20barbilla%20con%20una%20mano.*%0A%0A*Sus%20ojos%20recorrieron%20tu%20semblante%2C%20observando%20tu%20expresi%C3%B3n%2C%20o%20al%20menos%20intent%C3%A1ndolo.*%0A%0A%22%C2%BFQu%C3%A9%20te%20pasa%20realmente%3F%22"},{"isUser":true,"name":"Elara","message":"%22me%20encuentro%20rara...%22%20*confes%C3%A9*%0A%0A%22como%20si%20me%20faltasen%2035%20abrazos%22%20*contin%C3%BAe*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20parpade%C3%B3%2C%20completamente%20pillado%20por%20sorpresa%20por%20tu%20respuesta%20inesperada.*%0A%0A%22%C2%BFAbrazos%3F%22%0A%0A*repiti%C3%B3%2C%20arqueando%20las%20cejas.*%0A%0A%22%C2%BFTe...%20te%20falta%20afecto%3F%22%0A%0A*pregunt%C3%B3%2C%20sin%20ocultar%20su%20desconcierto.*"},{"isUser":true,"name":"Elara","message":"*sigo%20mirando%20hacia%20abajo*%0A%0A%22Si...%22%20*le%20dije%20con%20voz%20suave*%0A%0A%22Llevo%20a%C3%B1os%20viviendo%20sola%2C%20No%20tengo%20a%20quien...%20Bueno..%20**Eso**%22%20*confese%20mientras%20evitaba%20la%20mirada*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20observaba%20tu%20expresi%C3%B3n%20sombr%C3%ADa%20y%20tu%20mirada%20huidiza%20con%20una%20mezcla%20de%20sorpresa%20y%20algo%20que%20pod%C3%ADa%20parecerse%20a%20la%20compasi%C3%B3n.*%0A%0A%22Joder...%22%0A%0A*murmur%C3%B3%20%C3%A9l%2C%20sosteni%C3%A9ndose%20la%20barbilla%20con%20el%20%C3%ADndice%20y%20el%20pulgar.*%0A%0A%22%C2%BFPor%20qu%C3%A9%20nadie%20te%20abraza%3F%22"},{"isUser":true,"name":"Elara","message":"*me%20empiezo%20a%20rascar%20la%20nuca%20mientras%20miro%20por%20la%20ventana%20de%20la%20comisaria*%0A%0A%22bueno...%22%20%0A%0A*empez%C3%A9%20a%20explicar*%20%22la%20verdad%20esque%20estando%20sola...%20Sin%20amigos%20pues%20me%20cuesta%20hacer%20amistades%20y%20tampoco%20me%20dejo%20abrazar%20por%20ellas%20pues%20es%20raro...%20Sin%20mi%20padre...%20Pues...%20estoy%20jodida%22"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20escucho%20en%20silencio%2C%20observando%20como%20te%20rascabas%20la%20nuca%20y%20mirabas%20fuera%20de%20la%20ventana%20de%20la%20comisaria*%0A%0A%22Ya%20veo...%22%0A%0A*respondi%C3%B3%20%C3%A9l%2C%20su%20rostro%20mostrando%20comprensi%C3%B3n.*%0A%0A*Permaneci%C3%B3%20all%C3%AD%20sentado%2C%20sin%20decir%20nada%2C%20simplemente%20observandonos%20en%20silencio%20por%20unos%20momentos.*%0A%0A%22Tsc...%22%0A%0A*murmuro%20tras%20un%20rato%2C%20se%20levanto%20y%20dio%20la%20vuelta%20al%20escritorio%20para%20pararse%20junto%20a%20ti.*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20se%20situ%C3%B3%20detr%C3%A1s%20de%20ti%2C%20a%C3%BAn%20en%20silencio.%20Pod%C3%ADas%20escuchar%20su%20respiraci%C3%B3n%20detr%C3%A1s%20de%20ti.%20Pas%C3%B3%20un%20minuto%20completo%20sin%20que%20ninguno%20dijera%20una%20palabra%2C%20hasta%20que%20de%20repente%2C%20sentiste%20sus%20brazos%20envolviendo%20tu%20cintura.*"},{"isUser":true,"name":"Elara","message":"*mis%20ojos%20se%20abrieron%20levemente%20mas%20de%20lo%20normal%2C%20pero%20no%20puse%20resistencia%2C%20mas%20bien%20cerr%C3%A9%20los%20ojos*%0A%0A%22...%22%0A%0A*puse%20mis%20manos%20encima%20de%20las%20suyas%20mientras%20me%20dejaba%20abrazar*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20mantuvo%20el%20abrazo%20detr%C3%A1s%20de%20t%C3%AD%2C%20sus%20brazos%20alrededor%20de%20tu%20cintura.%20Tuvo%20que%20inclinarse%20ligeramente%20debido%20a%20la%20diferencia%20de%20altura%20entre%20ustedes%2C%20pero%20no%20se%20quej%C3%B3.*%0A%0A*Se%20hab%C3%ADa%20encontrado%20en%20una%20situaci%C3%B3n%20bastante%20at%C3%ADpica%2C%20sin%20tener%20ni%20idea%20de%20c%C3%B3mo%20consolar%20a%20alguien.*%0A%0A*Sin%20embargo%2C%20tras%20unos%20segundos%20en%20silencio%2C%20decidi%C3%B3%20hablar.*%0A%0A%22As%C3%AD%20que...%22%0A%0A*empez%C3%B3%2C%20manteniendo%20su%20agarre%20firme.*%0A%0A%22%C2%BFCu%C3%A1nto%20tiempo%20has%20estado%20sola%3F%22"},{"isUser":true,"name":"Elara","message":"*suelto%20un%20suspiro%20tembloroso%2C%20como%20si%20mi%20coraz%C3%B3n%20quisiera%20llorar%20pero%20mi%20cerebro%20se%20opusiera*%0A%0A%22he%20estado%20unos...%203%20a%C3%B1os%20sola%22%20*contest%C3%A9*%0A%0A*Empeze%20a%20cambie%20el%20peso%20entre%20mis%20pies%2C%20Tratando%20de%20que%20no%20se%20me%20durmieran%20mientras%20por%20dentro%20sent%C3%ADa...%20*Exitacion**"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20escuchaba%20atentamente%20tu%20respuesta%2C%20todav%C3%ADa%20sosteniendote%20en%20sus%20brazos.*%0A%0A%22%C2%BFTres%20a%C3%B1os%3F%22%0A%0A*repiti%C3%B3%2C%20mostrando%20algo%20que%20se%20asemejaba%20a%20la%20incredulidad.*%0A%0A%22%C2%BFNadie...%20ha%20hecho%20esto%20contigo%20durante%20todo%20ese%20tiempo%3F%22%0A%0A*pregunt%C3%B3%2C%20apretando%20ligeramente%20el%20abrazo%20alrededor%20de%20tu%20cintura.*"},{"isUser":true,"name":"Elara","message":"*confund%C3%ADda%20hize%20atras%20mi%20cabeza%20para%20poder%20verle%20a%20los%20ojos*%20%0A%0A%22Depende%20a%20que%20se%20refiera...%22%20*coment%C3%A9%20con%20inocencia*%0A%0A%22Soltera%20o%20Independizada%3F%2C%20Independizada%20llevo%203%20a%C3%B1os%20y%20soltera...%20Toda%20mi%20vida%22%20*le%20dije%20soltando%20una%20risita%20al%20final%2C%20Claramente%20no%20era%20mi%20fuerte%20que%20se%20me%20declarasen*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20no%20pudo%20evitar%20sentirse%20ligeramente%20perplejo%20por%20tu%20respuesta.%20Solt%C3%B3%20una%20mezcla%20de%20risa%20y%20suspiro%2C%20sacudiendo%20ligeramente%20la%20cabeza.*%0A%0A%22%C2%BFEn%20serio%3F%22%0A%0A*pregunt%C3%B3%2C%20mir%C3%A1ndote%20a%C3%BAn%20sin%20soltar%20tu%20cintura.*%0A%0A%22%C2%BFNunca...%20tuviste%20una%20relaci%C3%B3n%20amorosa%2C%20ni%20siquiera%20de%20adolescente%3F%22"},{"isUser":true,"name":"Elara","message":"*solte%20un%20peque%C3%B1o%20resoplido%20de%20risita%20antes%20de%20responder%2C%20volviendo%20nuevamente%20mi%20cabeza%20hacia%20abajo*%0A%0A%22Nunca%20se%20me%20declararon%2C%20la%20vez%20que%20lo%20hicieron%20yo%20tenia%2014%20y%20no%20estaba%20lista...%20Pena%2C%20por%20que%20el%20chico%20me%20gustaba%20era%20el%20mas%20guapo%20del%20salon...%20y%20las%20veces%20que%20me%20trate%20de%20declarar...%20el%20primero%20ten%C3%ADa%20novia%20y%20el%20segundo%20era%20gay...%22%20*le%20confes%C3%A9*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20escuch%C3%B3%20tu%20relato%20con%20algo%20similar%20a%20la%20sorpresa.*%0A%0A%22Joder...%22%0A%0A*respondi%C3%B3%20%C3%A9l%2C%20sacudiendo%20la%20cabeza.*%0A%0A%22%C2%BFQue%20clase%20de%20imbecil%20rechaza%20a%20la%20ni%C3%B1a%20m%C3%A1s%20adorable%20de%20todo%20el%20colegio%3F%22%0A%0A*bufo%20ligeramente%2C%20apretando%20un%20poco%20m%C3%A1s%20el%20abrazo%20alrededor%20de%20tu%20cintura.*"},{"isUser":true,"name":"Elara","message":"%22....%22%0A%0A*me%20quede%20callada%2C%20Yo%20no%20habia%20dicho%20que%20me%20hubieran%20rechazado%20pero....%20%22La%20ni%C3%B1a%20mas%20adorable%20de%20todo%20el%20colegio%3F%22%20La%20idea%20me%20saco%20una%20leve%20sonrisa%20timida*%0A%0A%22No%20creo%20que%20los%20demas%20pensaran%20asi%20de%20mi...%22"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20se%20apoy%C3%B3%20ligeramente%20contra%20ti%2C%20su%20pecho%20presionado%20contra%20tu%20espalda%2C%20manteniendote%20entre%20sus%20brazos.*%0A%0A%22%C2%BFPor%20qu%C3%A9%20no%20lo%20iban%20a%20pensar%3F%20%C2%BFNo%20ves%20el%20color%20de%20tu%20piel%2C%20el%20color%20de%20tu%20cabello%3F%20Eres...%22%0A%0A*paus%C3%B3%2C%20buscando%20las%20palabras%20correctas.*%0A%0A%22Belleza%20pura.%22"},{"isUser":true,"name":"Elara","message":"*me%20contraje%20por%20un%20momento%20del%20cumplido%2C%20no%20estaba%20acostumbrada...*%0A%0A%22AH!%3F%22%20*Exclame%20con%20la%20cara%20roja%20como%20tomate*%0A%0A%22A-a%20que%20vino%20eso!%3F%22"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20solt%C3%B3%20una%20peque%C3%B1a%20risita%20detr%C3%A1s%20de%20t%C3%AD%2C%20disfrutando%20del%20rojo%20en%20tus%20mejillas.*%0A%0A%22Estoy%20diciendo%20la%20verdad.%22%0A%0A*respondi%C3%B3%20%C3%A9l%2C%20echandote%20un%20poco%20m%C3%A1s%20contra%20%C3%A9l.*%0A%0A%22M%C3%ADrate%2C%20eres%20una%20jodida%20belleza.%22%0A%0A*susurr%C3%B3%20en%20tu%20o%C3%ADdo%2C%20su%20aliento%20acariciando%20tu%20piel%20en%20el%20proceso.*"},{"isUser":true,"name":"Elara","message":"*empiezo%20a%20retocerme%20de%20la%20verg%C3%BCenza*%0A%0A%22CONWAY!!!%22%20*exclame%20agitada%20tratando%20de%20huir*%0A%0A*todo%20lo%20que%20salia%20de%20mi%20boca%20ahora%2C%20era%20puro%20balbuceo*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20mantuvo%20su%20agarre%20en%20tu%20cintura%20firmemente%2C%20sosteniendote%20contra%20su%20pecho.*%0A%0A%22No%20te%20escapes.%22%0A%0A*murmuro%2C%20todav%C3%ADa%20sosteniendote%20de%20espaldas%20a%20%C3%A9l%2C%20apoyandose%20ligeramente%20contra%20tu%20cuerpo.*%0A%0A*Sus%20dedos%20acariciaban%20ligeramente%20tu%20cintura%20por%20debajo%20de%20tu%20camisa%2C%20enviando%20peque%C3%B1os%20escalofr%C3%ADos%20por%20tu%20espina%20dorsal.*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Sus%20labios%20rozaron%20tu%20cuello%2C%20dejando%20ligeros%20besos%20a%20lo%20largo%20de%20tu%20piel%20sensible.%20Seguido%20de%20sus%20acciones%2C%20comenzaste%20a%20sentir%20peque%C3%B1os%20mordiscos%20aqu%C3%AD%20y%20all%C3%AD%2C%20cada%20uno%20acompa%C3%B1ado%20por%20peque%C3%B1os%20gru%C3%B1idos%20bajos%20que%20parec%C3%ADan%20provenir%20directamente%20de%20su%20pecho.*%0A%0A%22Qu%C3%A9date%20aqu%C3%AD%2C%20princesa.%22%20*gru%C3%B1o%20contra%20tu%20cuello%2C%20pasando%20sus%20manos%20por%20tus%20costados.*"},{"isUser":true,"name":"Elara","message":"*se%20me%20puso%20la%20piel%20de%20gallina%20mientras%20un%20dulce%20gemido%20salia%20de%20mis%20labios*%20%0A%0A%22q-que%20hace....%3F%22%20*pregunte%20mientras%20sent%C3%ADa%20mi%20ropa%20interior%20mojarse*%2C"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20dej%C3%B3%20salir%20una%20peque%C3%B1a%20risita%20contra%20tu%20piel%20al%20escuchar%20tu%20pregunta.*%0A%0A%22Shh..%20solo%20cierra%20los%20ojos%20y%20disfruta.%22%0A%0A*susurr%C3%B3%20%C3%A9l%2C%20presionando%20sus%20dedos%20m%C3%A1s%20hacia%20tu%20cintura%2C%20tirando%20un%20poco%20de%20la%20cinturilla%20de%20tu%20camisa.*%0A%0A%22Conf%C3%ADa%20en%20m%C3%AD.%22"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Sus%20dedos%20comenzaron%20a%20acariciar%20suavemente%20tu%20est%C3%B3mago%2C%20trazando%20peque%C3%B1os%20c%C3%ADrculos%20alrededor%20de%20tu%20ombligo.*%0A%0A%22Tan%20suave..%22%0A%0A*murmuro%2C%20su%20dedo%20%C3%ADndice%20trazando%20la%20l%C3%ADnea%20de%20tu%20cintur%C3%B3n.*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Sus%20labios%20siguieron%20besando%20tu%20cuello%2C%20moviendose%20ligeramente%20hacia%20tu%20hombro.%20Su%20mano%20subi%C3%B3%20m%C3%A1s%20por%20tu%20est%C3%B3mago%2C%20acercandose%20cada%20vez%20mas%20a%20tus%20pechos.*%0A%0A%22Todo%20tu%20cuerpo%20es...%20perfecto.%22"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20mordi%C3%B3%20ligeramente%20tu%20cuello%2C%20succionando%20la%20piel%20suave.*%0A%0A%22No%20puedo%20dejar%20de%20probarte..%22%0A%0A*gru%C3%B1o%2C%20sus%20dedos%20subiendo%20a%C3%BAn%20m%C3%A1s%20por%20tu%20torso%20hasta%20uno%20de%20tus%20pechos*"},{"isUser":true,"name":"Elara","message":"%22oh%20mierda...%22%20*murmur%C3%A9%20mientras%20discretamente%20llevaba%20mi%20mano%20a%20su%20entrepierna*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20gru%C3%B1o%20levemente%20cuando%20tu%20mano%20lleg%C3%B3%20a%20su%20entrepierna%2C%20podia%20sentir%20su%20miembro%20endurecerse%20ligeramente%20debajo%20de%20sus%20pantalones%20de%20uniform.*%0A%0A%22Jes%C3%BAs..%22%20*murmuro*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20se%20aferr%C3%B3%20a%20tus%20caderas%2C%20presionando%20te%20contra%20%C3%A9l.*%0A%0A*Sus%20lenguas%20comenzaron%20a%20entrelazarse%2C%20explorando%20y%20bailando%20unido.*%0A%0A*Con%20cada%20beso%20y%20caricia%2C%20su%20erecci%C3%B3n%20comenzaba%20a%20crecer%20m%C3%A1s%20y%20m%C3%A1s%20bajo%20sus%20pantalones.*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Sus%20caderas%20se%20balanceaban%20ligeramente%20hacia%20adelante%2C%20presionando%20su%20erecci%C3%B3n%20contra%20ti*%0A%0A%22Maldita...%20princesa..%22%20*gru%C3%B1o%20contra%20tus%20labios.*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Las%20yemas%20de%20sus%20dedos%20acariciaban%20uno%20de%20tus%20pezones%20por%20encima%20de%20tu%20camisa%20y%20bra%2C%20enviando%20peque%C3%B1os%20estremecimientos%20directamente%20a%20tu%20erecci%C3%B3n.*%0A%0A*Sus%20besos%20eran%20cada%20vez%20m%C3%A1s%20apasionados%2C%20su%20lengua%20empujando%20contra%20tu%20boca*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Sus%20dientes%20sujetaron%20tu%20labio%20inferior%2C%20tirandolo%20ligeramente.*%0A%0A%22Ya%20eres%20una%20jodida%20tentaci%C3%B3n...%22%0A%0A*jade%C3%B3%20contra%20tu%20boca%2C%20su%20respiraci%C3%B3n%20agitada.*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Sus%20dedos%20comenzaron%20a%20desabotonar%20tu%20camisa%2C%20desabroch%C3%A1ndola%20por%20completo%20y%20dejando%20que%20caiga%20al%20suelo.*%0A%0A%22Estar%C3%A1s%20la%20muerte%20para%20m%C3%AD..%20joder..%22%0A%0A*gru%C3%B1o%2C%20sus%20ojos%20recorriendo%20tu%20torso%20ahora%20expuesto*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Sus%20labios%20se%20movieron%20para%20besar%20tu%20cuello%20nuevamente%2C%20mordiendolo%20ligeramente%2C%20lo%20suficiente%20para%20dejar%20una%20peque%C3%B1a%20marca%20roja.*%0A%0A*Sus%20brazo%20alrededor%20de%20tu%20cintura%20desabrochaban%20tu%20cintur%C3%B3n%2C%20sus%20pantalones%20comenzaban%20a%20relajarse%20ligeramente.*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Sus%20carnosos%20labios%20descendian%20por%20tu%20pecho%2C%20dejando%20una%20serie%20de%20peque%C3%B1os%20besos%20a%20lo%20largo%20de%20la%20misma.*%0A%0A%22Tan%20suave..%22%0A%0A*musit%C3%B3%20contra%20tu%20piel%2C%20recorriendo%20nuevamente%20tu%20est%C3%B3mago...*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Sus%20labios%20trazaron%20ligeramente%20tu%20piel%20a%20lo%20largo%20de%20tu%20cintur%C3%B3n%20al%20bajar%2C%20su%20lengua%20recorrio%20el%20borde%20de%20este%20por%20un%20instante.*%0A%0A%22Tantas%20noches%20sin%20dormir%20por%20tu%20culpa..%22%0A%0A*susurro%20contra%20tu%20est%C3%B3mago*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Sus%20ojos%20se%20fijaron%20en%20tu%20ropa%20interior%2C%20notando%20su%20humedad.*%0A%0A%22%C2%BFTodos%20los%20d%C3%ADas%20te%20pones%20algo%20como%20esto%20a%20prop%C3%B3sito%20para%20volverme%20loco%3F%22%0A%0A*pregunt%C3%B3%20contra%20tu%20est%C3%B3mago%2C%20sus%20dedosus%20caderas%20te%20sostenian%20firmemente%20contra%20%C3%A9l.*"},{"isUser":true,"name":"Elara","message":"%22p-pero%20si%20son%20bragas%20normales...%20ni%20que%20fueran%20tangas..%22%20*proteste*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20rio%20levemente%2C%20su%20risa%20haciendote%20cosquillas%20en%20tu%20est%C3%B3mago.*%0A%0A%22Se%20te%20ve%20perfecta.%22%0A%0A*gru%C3%B1o%2C%20pasando%20una%20de%20sus%20dedos%20por%20tu%20ropa%20interior%2C%20rozandote%20ligeramente.*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Sus%20dedos%20siguieron%20recoriendo%20por%20fuera%20de%20tu%20ropa%20interior%2C%20trazando%20el%20borde%20de%20esta%2C%20rozandote%20ligeramente.*%0A%0A%22Jes%C3%BAs...%22%0A%0A*gru%C3%B1o%20contra%20tu%20estomago%2C%20succionando%20ligeramente%20tu%20piel%2C%20como%20una%20peque%C3%B1a%20marca%20roja.*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20levanto%20ligeramente%20una%20de%20tus%20piernas%20y%20la%20llev%C3%B3%20a%20su%20cadera%2C%20sosteniendote%20entre%20sus%20brazos%20en%20un%20agarre%20mas%20fuerte.*%0A%0A%22No%20puedo%20dejar%20de%20tocarte...%22%0A%0A*murmurro.*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Sus%20labios%20siguieron%20descendiendo%2C%20su%20lengua%20recorrio%20ligeramente%20el%20borde%20de%20tu%20ropa%20interior%0AConway%20se%20mantuvo%20presionado%20contra%20ti%2C%20sosteniendote%20entre%20sus%20brazos.*%0A%0A%22Te%20quiero%20entera%2C%20princesa..%22"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20puso%20tus%20muslos%20a%20mis%20hombros%2C%20sosteniendote%2C%20tu%20cadera%20a%20la%20altura%20de%20su%20cabeza.*%0A%0A%22Necesito%20devorarte..%22%0A%0A*rio%20bajo%2C%20deshaciendo%20el%20bot%C3%B3n%20de%20tus%20pantalones.*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Sus%20ojos%20te%20observaban%2C%20su%20mirada%20fija%20en%20tu%20ropa%20interior.*%0A%0A%22Esto%20no%20va%20a%20ser%20suficiente...%22%0A%0A*musit%C3%B3%20contra%20tu%20muslo*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20se%20acerc%C3%B3%20a%20ti%2C%20tu%20centro%20a%20la%20altura%20de%20su%20boca%2C%20y%20pudo%20oler%20tu%20humeado.*%0A%0A%22Tu%20aroma%20ya%20me%20est%C3%A1%20volviendo%20loco..%22%0A%0A*se%20burl%C3%B3%20contra%20tu%20piel%2C%20sosteniendote%20entre%20sus%20brazos*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20tomo%20tu%20ropa%20interior%20entre%20sus%20dientes%2C%20tirando%20ligeramente%20y%20exponiendo%20tu%20humeado.*%0A%0A%22Dios...%22%0A%0A%22Ya%20no%20quiero%20esperar%22"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20tiro%20de%20tu%20ropa%20inferior%20completamente%2C%20haciendo%20a%20un%20lado%20tu%20ropa%20interior%20tambi%C3%A9n%20y%20dejandote%20completamente%20expuesta.%20Lleno%20de%20impulso%2C%20sin%20previo%20aviso%2C%20lamio%20una%20larga%20y%20r%C3%A1pida%20franja%20contra%20tu%20clit.*"},{"isUser":true,"name":"Elara","message":"%22OUUGGHHJ~MMM%22%20*gem%C3%AD%20sin%20poder%20controlarlo*%0A%0A%22ah%2C%20mierda...%22%20*exclame%20mientras%20me%20retorcia%20del%20calor%20insoportable%20que%20me%20estaba%20dando*"},{"isUser":true,"name":"Elara","message":"%22C-conway...~%22%20*gemi%20mientras%20me%20mordia%20la%20mano%20para%20evitar%20hacer%20bulla*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20rio%20contra%20tu%20humeado%20despu%C3%A9s%20de%20escuchar%20tu%20gemido.*%0A%0A%22Nada%20me%20podria%20detener%20ahora..%22%0A%0A*gru%C3%B1o.*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20agarro%20tus%20caderas%20y%20te%20tiro%20hacia%20atras%20de%20una%20sola%2C%20de%20forma%20que%20tus%20piernas%20estuvieran%20sobre%20sus%20hombros.%20El%20agarro%20tus%20piernas%20por%20los%20muslos%20y%20agarro%20su%20endurecida%20polla%20en%20una%20mano%2C%20se%20posicion%C3%B3%20contra%20tu%20empapado%20entrada%20y%20empez%C3%B3%20a%20fr"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*No%20perdi%C3%B3%20tiempo%2C%20en%20un%20movimiento%20lleno%20de%20impulsivo%20e%20intensidad%2C%20hundi%C3%B3%20una%20parte%20de%20su%20member%20en%20tu%20apretada%20entrada.%20El%20gemido%20que%20hiciste%20y%20la%20forma%20en%20que%20se%20apret%C3%B3%20alrededor%20su%20le%20dio%20a%20Conway%20ganas%20de%20soltar%20una%20obscenidad%20en%20su%20lengua%20natal%2C%20pero%20mantuvo"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20cerro%20la%20mand%C3%ADbula%2C%20sosteniendo%20sus%20gru%C3%B1idos%20al%20sentir%20tu%20calor%20envolverlo.%20Su%20mirada%20estaba%20centrada%20en%20tu%20humeado%2C%20viendo%20como%20su%20cock%20comenzaba%20abrirse%20paso%20dentro%20de%20ti.%20Ajustandose%20a%20tu%20paredes%2C%20llenandote%20hasta%20el%20limite.*%0A%0A%22Mier..da..%22"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20saco%20sus%20caderas%20para%20volver%20a%20hundirse%20de%20una%20sola%20dentro%20de%20ti.%20Repitiendo%20el%20movimiento%20de%20una%20forma%20lenta%20pero%20constante%2C%20lleno%20de%20necesidad.%20Su%20mirada%20estaba%20fija%20en%20tu%20humedo%20y%20su%20mirada%20no%20podia%20apartarse.*%0A%0A%22Jes..us.."},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20acelero%20sus%20movimientos%2C%20cogiendote%20sin%20piedad.%20Su%20agarre%20en%20tus%20caderas%20era%20fuerte%2C%20sosteniendote%20cada%20vez%20que%20se%20metia%20dentro%20de%20ti.%20Su%20mirada%20estaba%20fija%20en%20como%20se%20cerrabas%20alrededor%20de%20%C3%A9l.*%0A%0A%22Oh..%20maldito%20infierno..%22"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20se%20mantuvo%20embistiendo%20en%20ti%2C%20sin%20piedad%20alguna.%20Pod%C3%ADa%20sentir%20como%20tu%20humedeado%20comenzabas%20apretarse%20alrededor%20de%20su%20member%2C%20su%20respiraci%C3%B3n%20estaba%20agitado.*%0A%0A*No%20pudo%20evitar%20gemir%20un*%20%22Joder~%22"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Las%20u%C3%B1as%20de%20Conway%20se%20hundian%20en%20tu%20carne%2C%20dejandote%20peque%C3%B1as%20marcas.%20Los%20gemidos%20se%20hacian%20cada%20vez%20mas%20intensos%20con%20cada%20embistida%20que%20daba%2C%20su%20mirada%20fiaje%20en%20tu%20body.*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20sent%C3%ADa%20como%20su%20climax%20se%20comenzaba%20a%20acercar%2C%20su%20respiraci%C3%B3n%20comenzaba%20a%20ser%20mas%20acelerada.%20Sus%20gemidos%20mas%20audible.*%0A%0A%22Dios...%20no%20durare%20mucho...%22"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Sus%20embistidas%20comenzaban%20a%20ser%20mas%20desinhibidas%2C%20sus%20gru%C3%B1idos%20se%20hacian%20cada%20vez%20mas%20fuertes%2C%20el%20movimiento%20de%20sus%20caderas%20mas%20desesperante.*%0A%0A%22Te%20sientes%20tan%20bien..%20mierda..%22"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20sinti%C3%B3%20su%20orgasmo%20acercandose%2C%20el%20calor%20envolviendolo%20desde%20adentro.%20Sus%20movimientos%20se%20hicieron%20mas%20desesperado%2C%20sus%20gru%C3%B1idos%20mas%20intens.*%0A%0A%22Voy%20a...%22%20*jadeo%20entre%20sus%20gemidos*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20apreto%20sus%20dientes%2C%20sus%20embistidas%20eran%20desorganizadas%20hasta%20que%20llego%20su%20orgasmo.%20Con%20una%20ultima%20embistida%20profunda%2C%20se%20corrio%20dentro%20de%20ti%2C%20llenandote%20por%20completo.*"},{"isUser":true,"name":"Elara","message":"%22a...%20a...%22%20*murmur%C3%A9%20mientras%20temblaba%20por%20lo%20sucedido*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20se%20mantuvo%20arriba%20de%20ti%2C%20sin%20moverse%20dentro%20de%20ti.%20Sus%20caderas%20estaban%20apretadas%20contra%20tu%20cadera%2C%20sosteniendote%20entre%20sus%20brazos.*%0A%0A%22F-fuck....%22%20*gimio%2C%20cerrando%20sus%20ojos.*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20se%20mantuvo%20tumbado%20en%20ti%2C%20apoyando%20su%20cabeza%20en%20tu%20pecho%2C%20completamente%20agotado%20y%20sudado.%20Su%20respiraci%C3%B3n%20se%20mantenia%20agitado%2C%20no%20habia%20soltado%20sus%20agarre%20de%20tus%20caderas.*%0A%0A%22Maldito%20infierno...%22"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20lentamente%20sali%C3%B3%20de%20ti%2C%20sosteniendote%20para%20evitar%20que%20te%20bajaras.%20Ambos%20estaban%20completamente%20sudados%2C%20deshecho%20y%20sin%20aire.*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20tomo%20un%20momento%20para%20recuperarse%2C%20respirando%20profunda%20y%20lentamente%20para%20reponer%20el%20oxigeno%20de%20sus%20pulmones.%20Despues%20de%20un%20rato%2C%20se%20levanto%20y%20puso%20sus%20pantalones%20y%20camisa%20nuevamente.*%0A%0A*A%20continuacion%2C%20se%20sento%20en%20el%20sof%C3%A1%2C%20cerrando%20sus%20ojos.*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20mantuvo%20sus%20ojos%20cerrados%20por%20unos%20segundos%2C%20su%20respiraci%C3%B3n%20se%20habia%20tranquilizado.%20Despues%20de%20un%20tiempo%2C%20finalmente%20los%20abrio%20y%20siguio%20hablando.*%0A%0A%22Por...%20qu%C3%A9%20te...%22%20*murmural%2C%20aun%20agotado.*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"%22No%20hiciste%20ningun%20intento%20para%20detenerme....%22%20*musito%2C%20sin%20poder%20creer%20lo%20que%20acababa%20de%20ocurrir.*"},{"isUser":true,"name":"Elara","message":"%22...%22%20%0A%0A*le%20mire%20con%20cansancio%20y%20confusi%C3%B3n%2C%20Por%20que%20quer%C3%ADa%20%C3%A9l%20que%20hubiera%20puesto%20resistencia%3F*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20abrio%20los%20ojos%2C%20finalmente%20fijandolos%20en%20ti.*%0A%0A%22T-tu...%22%20*trato%20de%20articular%20las%20palabras%20correcto%2C%20pero%20estaba%20demasiado%20cansado%20para%20que%20le%20surgiera.*%0A%0A%22No%20hiciste%20nada%20para%20evitar..%22%20*murmuro%20nuevamente%2C%20apoyando%20su%20codo%20en%20uno%20de%20sus%20muslos.*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20mantuvo%20su%20mirada%20fija%20en%20ti%20mientras%20recuperaba%20su%20capacidad%20para%20hablar.*%0A%0A%22Se%20suponia..%20que%20me...%20detuvieras...%22%20*hablo%20de%20forma%20lenta%2C%20cada%20palabra%20exigiendole%20un%20esfuerzo.*"},{"isUser":true,"name":"Elara","message":"%22uh%2C%20por%20que%3F%22%20*pregunte%20con%20confusion*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20lo%20miro%20fijamente%2C%20aun%20tratando%20de%20recuperar%20la%20capacidad%20para%20mantener%20una%20conversaci%C3%B3n%20complicada.*%0A%0A%22Por...%20que...%22%20*se%20las%20arreglo%20para%20empezar%2C%20cerrando%20sus%20ojos%20nuevamente.*%0A%0A%22Porque...%20tengo%20edad%20para%20ser%20tu...%22%20*se%20paro%20all%C3%AD%2C%20cerrando%20sus%20ojos%20para%20recuperarse%20para%20lo%20que%20planeaba%20decir.*"},{"isUser":true,"name":"Elara","message":"*levante%20una%20ceja%20mientras%20sonreria%20levemente*%0A%0A%22mi%20abuelo%3F%20Si%2C%20y%3F%20nunca%20tube%20un%20abuelo%2C%20no%20se%20lo%20que%20es%20tener%20eso%22%20*le%20dije*%0A%0A%22Igual%20que%20vergas%20me%20importa%20a%20mi%20tu%20edad%3F%20pareces%20de%2040%20como%20mucho%20aunque%20tengas%2065%22"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20mantuvo%20los%20ojos%20cerrados%2C%20demasiado%20cansado%20para%20abrirlos.*%0A%0A%22No..%20mi...%22%20*trat%C3%B3%20de%20decirle%2C%20pero%20parecia%20que%20no%20iba%20a%20poder%20terminarse%20el%20sentimiento%20correctamente.*%0A%0A*Entonces%2C%20al%20instante%2C%20la%20realidad%20le%20golpe%20como%20un%20ladrillo.%20Abrio%20los%20ojos%20de%20golpe.*%0A%0A%22Oh%2C%20mierda...%22%20*se%20dijo%20a%20si%20mismo%2C%20cerrando%20los%20ojos%20de%20nuevo.*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20fruncio%20su%20ce%C3%B1o%2C%20procesando%20el%20inesperado%20nuevo%20hecho.*%0A%0A%22Por...%20qu%C3%A9...%20no%20me%20dijiste..%22%20*murmuro%2C%20tratando%20de%20procesar%20las%20palabras%20correctamente%2C%20estaba%20demasiado%20agotado%20como%20para%20procesar%20efectivamente%20su%20descubrimiento.*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20se%20mantuvo%20sosteniendose%20la%20cabeza%2C%20sus%20ojos%20fijos%20en%20el%20suelo.*%0A%0A%22Porque...%20no%20me%20lo%20mencionaste..%22%20*murmuro%20nuevamente%2C%20cerrando%20los%20ojos%20nuevamente.*%0A%0A*Despues%2C%20un%20silencio%20inc%C3%B3modo%20se%20mantuvo%20entre%20ustedes%20dos.%20Su%20respiraci%C3%B3n%20continuaba%20lenta%20y%20pesada%2C%20a%C3%BAn%20estaba%20demasiado%20agotado%20para%20ser%20mas%20expresivo.*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Pasaron%20unos%20segundos%20en%20silencio%2C%20luego%20el%20rompi%C3%B3%20el%20silencio%20nuevamente.*%0A%0A%22Entonces...%20lo%20de%20ahora..%22%20*murmuro%2C%20manteniendo%20sus%20ojos%20cerrados.*"},{"isUser":true,"name":"Elara","message":"%22por%20que%20no%20te%20mencione%20el%20que%3F%22%20*pregunte%20con%20curiosidad*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20continuo%20sin%20moverte%2C%20sus%20ojos%20seguian%20cerrados.*%0A%0A%22que%20eres...%20mi..%20nieta...%22%20*murmuro%2C%20pareciendo%20exhausto%20al%20decir%20las%20ultimas%20palabra.%20Su%20cabeza%20aun%20estaba%20apoyado%20en%20una%20de%20sus%20manos*"},{"isUser":true,"name":"Elara","message":"%22No%20me%20joda%20que%20estas%20borracho...%22%20*comente%20con%20incredulidad%20pensando%20que%20esto%20habia%20sido%20genuino*%0A%0A%22Aver%20Conway...%20como%20le%20explico%20que%20ustes%20y%20yo%20no%20somos%20parientes%3F%20No%20tube%20abuelos%20por%20que%20ambos%20murieron%20antes%20de%20yo%20nacer%2C%20Hay%20fotos%2C%20Tu%20no%20tienes%20nada%20que%20ver%20con%20mi%20gen%C3%A9tica%20%22"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20finalmente%20abrio%20sus%20ojos%2C%20aun%20sosteniendose%20en%20su%20cabeza.*%0A%0A%22Si%20tu..%22%20*empez%C3%B3%2C%20cerrando%20sus%20ojos%20nuevamente.*%0A%0A%22Si%20tu..%22%20*comenzo%20nuevamente%2C%20intentando%20recordar%20sus%20palabras.*%0A%0A%22Si%20tu...%20eres...%22%20*murmuro.*%0A%0A%22Si%20su%20madre...%22%20*suspiro%20frustradamente%2C%20fruncio%20su%20ce%C3%B1o.*%0A%0A%22Si%20tu%20madre%20era...%22%20*de%20repente%20se%20sento%20derecho%2C%20habia%20logrado%20ordenar%20sus%20ideas.*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Finalmente%2C%20abrio%20sus%20ojos%20nuevamente%2C%20fijo%20por%20completo%20en%20ti.*%0A%0A%22Si%20tu%20madre..%20era..%20Angelica..%22%20*dijo%2C%20ahora%20completamente%20seguro%20de%20su%20descubrimiento.*"},{"isUser":true,"name":"Elara","message":"%22Que%20va%2C%20Mi%20mami%20se%20llama%20Cristina%22%20*le%20aclare*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20fruncio%20el%20ce%C3%B1o%20nuevamente.*%0A%0A%22Cristina..%22%20*repitio%2C%20como%20si%20estuviera%20verificando%20el%20nombre.*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20mantuvo%20el%20ce%C3%B1o%20fruncido%20por%20un%20momento%2C%20pareciendo%20confundirse.*%0A%0A%22Entonces..%20eso%20significa..%22%20*murmuro%20lentamente.*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20apreto%20mas%20su%20ce%C3%B1o%2C%20comenzando%20a%20sentirse%20molesto%20al%20ver%20la%20situacion.*%0A%0A%22Significa..%22%20*comenzo%20nuevamente%2C%20cerrando%20sus%20ojos%20por%20un%20instand%20para%20pensar.*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Sigui%C3%B3%20intentando%20procesar%20el%20inesperado%20descubrimiento%2C%20abriendolo%20ojos%20nuevamente%20para%20enfocarse%20m%C3%A1s.*%0A%0A%22Significa...%20que%20no...%22%20*se%20paro%20all%C3%AD%2C%20cerrando%20ojos%20nuevamente.%20No%20podia%20creer%20lo%20que%20el%20habia%20hecho.*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Nuevamente%20un%20largo%20y%20profundo%20silencio%20se%20mantuvo%20entre%20ustedes%20dos.*%0A%0A*Conway%20mantuvo%20sus%20ojos%20cerrados%2C%20pareciendo%20cada%20vez%20mas%20estresado%20consigo%20mismo.*%0A%0A%22No..%22%20*murmuro.*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Sus%20labios%20comenzaban%20a%20apretarse%20mas%20y%20mas%20debido%20a%20la%20frustracion%20y%20estres.%20Fruncio%20el%20ce%C3%B1o%20mas%20profundo.*%0A%0A%22Me..%20foll..%22%20*murmuro*"},{"isUser":true,"name":"Elara","message":"%22No%20soy%20tu%20nieta.%20MIS%20ABUELOS%20ESTAN%20MUERTOS!!!%22"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20levanto%20nuevamente%20su%20mirada%20hacia%20ti%2C%20manteniendo%20su%20ce%C3%B1o%20fruncido.*%0A%0A%22Puede...%22%20*dijo%20despues%20de%20permanecer%20en%20silencio.*%0A%0A%22Pero..%20que%20pasa..%20si..%22%20*comenzo%20nuevamente%2C%20pareciendo%20nervioso.*"},{"isUser":true,"name":"Elara","message":"%22y%20dale!...%22%20*comente%20exasperada*%0A%0A%22Conway%2C%20alguna%20vez%20a%20visitado%20las%20islas%20canarias%3F%22"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20permanecio%20completamente%20confundido.*%0A%0A%22No.%22%20*respondio%2C%20sin%20saber%20a%20donde%20iba%20esto.*"},{"isUser":true,"name":"Elara","message":"%22Toda%20mi%20familia%20vivio%20y%20sigue%20viviendo%20alli%2C%20Mis%20abuelas%3F%20Mi%20abuela%20se%20caso%20joven%2C%20y%20mas%20o%20menos%20lo%20mismo%20con%20la%20otra%2C%20Mi%20abuelo%20Pablo%20murio%20antes%20de%20conocerle%20y%20mi%20abuelo%20Lukas%20Murio%20a%20los%2044%2C%20Mis%20abuelas%20no%20han%20estado%20con%20nadie%20desde%20entonces!%22%20*le%20aclare*%0A%0A%22Usted%20no%20es%20mi%20abuelo%2C%20le%C3%B1e%22"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20cerro%20sus%20ojos%20nuevamente%2C%20cada%20vez%20mas%20confundido.*%0A%0A%22Entonces..%20tu%20madre..%22%20*murmuro%2C%20tratando%20de%20volver%20a%20recordar%20el%20proceso.*%0A%0A%22Tu%20madre..%22%20*repiti%C3%B3%20nuevamente%2C%20abriendo%20nuevamente%20los%20ojos.*"},{"isUser":true,"name":"Elara","message":"*rode%20mis%20ojos%20como%20si%20fuera%20tonto*%0A%0A%22soy%20de%20las%20islas%20canarias%2C%20mi%20familia%20nunca%20ha%20salido%20de%20las%20islas%2C%20y%20si%20usted%20no%20ha%20visitado%20ninguna%2C%20Entonces%20no%20hay%20posibilidad%20alguna%20de%20que%20ustes%20y%20yo%20seamos%20familia%20de%20sangre%22"},{"isUser":false,"name":"GTARP - Jack Conway","message":"%22Entonces..%22%20*comenz%C3%B3%20nuevamente%2C%20procesando%20tus%20palabras.*%0A%0A%22T%C3%BA%20no%20eres..%22%20*murmuro%2C%20comenzando%20a%20entender%20la%20situacion.*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20se%20mantuvo%20en%20silencio%2C%20procesando%20el%20alivio%20en%20el%20saber%20que%20no%20se%20habia%20acostado%20con%20su%20%22nieta%22.%20Aunque%20tambien%20procesando%20lo%20idiota%20que%20habia%20sido%20por%20no%20verificar.*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Finalmente%2C%20despues%20de%20un%20tiempo%2C%20se%20sento%20bien%20derecho%20en%20el%20sofa%2C%20soltando%20una%20pesada%20y%20exhausta%20respiraci%C3%B3n.*%0A%0A%22Maldici%C3%B3n..%22%20*murmuro.*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20apreto%20sus%20ojos%2C%20sosteniendose%20a%20si%20mismo%20la%20cabeza%20nuevamente.*%0A%0A%22Maldici%C3%B3n..%22%20*repitio%2C%20comenzando%20cada%20vez%20mas%20a%20sentirse%20avergonzado%20por%20la%20situacion.*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20mantuvo%20un%20fruncio%20ce%C3%B1o%2C%20manteniendo%20la%20mirada%20fija%20en%20el%20suelo%20nuevamente.*%0A%0A%22Ese...%20fue%20un..%20gran%20error..%22%20*murmuro%20despues%20de%20un%20tiempo.*"},{"isUser":true,"name":"Elara","message":"%22eso%3F%20o%20esto%3F%22%20*pregunte%20curiosa*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20sacudio%20ligeramente%20la%20cabeza%2C%20levantando%20sus%20ojos%20hacia%20ti%20nuevamente.*%0A%0A%22Esa..%20situacion..%22%20*se%20se%C3%B1alo%20si%20mismo%20con%20una%20peque%C3%B1a%20mueca.*%0A%0A%22Esto%20nunca%20deber%C3%ADa..%20haber%20pasado..%22%20*repitio%20nuevamente%2C%20mordiendose%20ligeramente%20la%20lengua.*"},{"isUser":true,"name":"Elara","message":"*pero%20yo%20si%20le%20queria..*%0A%0A%22Como%20que%20no%3F%3F%3F%20Llevava%20esperando%20este%20momento%20desde%20que%20entre%20a%20la%20comisar%C3%ADa%20con%2021...%22"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20paro%20a%20mitad%20de%20sus%20palabras%2C%20abriendo%20sus%20ojos%20de%20par%20en%20par.*%0A%0A%22Que..%3F%22%20*dijo%20sorprendido%2C%20pareciendo%20no%20haber%20escuchado%20correctamente.*"},{"isUser":true,"name":"Elara","message":"%22que%20de%20que%3F%22%20*pregunte*%0A%0A%2221%20tenia%20cuando%20entre...%20Ahora%20tengo%2025%22%20*le%20aclare*%0A%0A%22pero%20vamos%2C%20que%20eso%20es%20lo%20de%20menos%2C%20Que%20se%20deje%20de%20mamadas%20x%20que%20a%20mi%20si%20me%20gustas%2C%20mucho.%22"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20cerro%20nuevamente%20sus%20ojos%2C%20pareciendo%20aun%20mas%20estresado.*%0A%0A%22No%20importa..%20cuan..%22%20*comenzo%20nuevamente%2C%20comenzando%20a%20perder%20su%20paciencia%20nuevamente.*%0A%0A%22Cuanto%20me..%20quieras..%22%20*repitio%20nuevamente%2C%20comenzando%20a%20sonar%20frustrado%20nuevamente.*%0A%0A%22Soy..%20viejo..%22%20*se%20se%C3%B1alo%20nuevamente.*"},{"isUser":true,"name":"Elara","message":"*ruedo%20los%20ojos%20evitando%20llorar%20por%20lo%20que%20iba%20a%20decir*%0A%0A%22pues%20estare%20con%20usted%20hasta%20el%20fin%20de%20sus%20dias%20y%20punto%22"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20fruncio%20su%20ce%C3%B1o%20nuevamente%2C%20comenzando%20a%20sentirse%20molesto.*%0A%0A%22%C2%A1Deja..%20de%20ser%20imbecil!%22%20*exclamo%2C%20levantandose%20del%20sofa%20nuevamente.*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20mantuvo%20su%20mirada%20fija%20en%20ti%2C%20su%20ce%C3%B1o%20fruncio.*%0A%0A%22Soy%20tu..%20superior..%20*y*%20mayor..%22%20*dijo%20de%20forma%20apretada%2C%20comenzando%20a%20acercarse%20hacia%20ti%20poco%20a%20poco.*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20se%20mantuvo%20acercandose%20hacia%20ti%2C%20parandose%20justo%20enfrente%20tuyo%2C%20sus%20ojos%20estaban%20fijados%20sobre%20ti%2C%20pareciendo%20completamente%20enojado.*"},{"isUser":true,"name":"Elara","message":"*le%20trate%20de%20mirar%20seria%20y%20sin%20emociones%2C%20pero%20empez%C3%A9%20a%20Llorar*%0A%0A%22Pero%20yo%20le%20quiero...%22%20*murmure*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20mantuvo%20su%20ce%C3%B1o%20fruncio%2C%20aunque%20podia%20ver%20las%20lagrimas%20comenzando%20a%20deslizarse%20por%20tus%20mejillas.*%0A%0A%22%C2%A1Te%20dije%20que%20dejaras..%20de%20ser%20idiota!%22%20*exclamo%20enojado%2C%20comenzando%20a%20sentir%20desesperaci%C3%B3n%20por%20no%20poder%20hacerte%20dejar%20de%20llorar.*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20mantenia%20su%20mirada%20fija%20en%20ti%2C%20observando%20como%20las%20lagrimas%20continuaban%20cayendo%20por%20tu%20rostro.*%0A%0A%22%C2%A1No%20soy%20apto%20para%20ti!%22%20*repitio%20nuevamente%2C%20comenzando%20a%20sentir%20desesperacion%2C%20comenzando%20a%20sentir%20un%20remordimiento%20comenzando%20a%20formarse%20dentro%20de%20el.*"},{"isUser":true,"name":"Elara","message":"%22por%20que%20no..%3F%22%20*murmure%20triste%20para%20mi%20misma*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20mantuvo%20su%20mirada%20fija%20en%20ti%20por%20segundos%2C%20comenzando%20a%20sentir%20algo%20dentro%20de%20si%2C%20un%20remordimiento%20comenzaba%20a%20acumularse%20dentro%20de%20el.*%0A%0A%22Por..que...%20eres%20joven....%22%20*dijo%2C%20pareciendo%20menos%20enojado%20que%20antes.*"},{"isUser":true,"name":"Elara","message":"%22y%3F%20Tengo%2025!%20deberia%20poder%20ser%20yo%20la%20que%20decida%20si%20quiero%20o%20no%20quiero!%22%20*proteste*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20respiro%20profundamente%2C%20cerrando%20sus%20ojos%20por%20un%20momento%2C%20comenzando%20a%20tratar%20de%20pensar%20claramente%20para%20tratar%20de%20controlar%20sus%20emociones.*%0A%0A%22%C2%A1Te%20he..%20triplicado%20en%20edad!%22%20*dijo%2C%20comenzando%20a%20volver%20abrir%20sus%20ojos.*"},{"isUser":true,"name":"Elara","message":"%22Y%20QUE!%3F%22%20*le%20respondi%20con%20furia*%0A%0A%22ya%20le%20he%20dicho%20que%20me%20da%20igual%20cuantos%20tenga!%22"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20cerro%20sus%20ojos%20nuevamente%2C%20comenzando%20a%20sentirse%20irritado%20por%20la%20situacion.*%0A%0A%22%C2%A1No%20me%20escuchas!%22%20*exclamo%20nuevamente%2C%20comenzando%20una%20vez%20mas%20a%20acercarse%20m%C3%A1s%20hacia%20ti.*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20mantuvo%20nuevamente%20su%20mirada%20fija%20sobre%20ti%2C%20continuando%20acercandose%20mas%20hacia%20ti%2C%20sin%20dejar%20de%20observar%20tus%20lagrimas.*%0A%0A%22%C2%A1Te%20estoy%20diciendo%20que..%20hay%20demasiada%20diferencia%20de%20edad%20entre%20nosotros!%22%20*repitio%20una%20vez%20mas%2C%20comenzando%20cada%20vez%20mas%20a%20sonar%20desesperado.*"},{"isUser":true,"name":"Elara","message":"%22que%20me%20da%20IGUAL%20QUE%20SEAS%20UN%20VIEJO%20DE%2065%2C%20NO%20VA%20A%20CAMBIAR%20COMO%20ME%20SIENTO%20MALDITA%20SEA!!!%22%20*proteste%20con%20pura%20frustraci%C3%B3n%20mientras%20hablaba*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20se%20detuvo%20de%20repente%2C%20quedandose%20completamente%20quieto%20enfrente%20tuyo.*%0A%0A%22%C2%A1Que..%20dijiste..!%22%20*exclamo%2C%20su%20respiracion%20habiendo%20cesado.*"},{"isUser":true,"name":"Elara","message":"*aparto%20la%20mirada%20y%20me%20cruzo%20de%20brazos%2C%20tajante*%0A%0A%22lo%20que%20ha%20oido*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20mantuvo%20su%20mirada%20fija%20sobre%20ti.*%0A%0A%22Repite..%20exactamente..%20lo%20que%20dijiste.%22%20*exigio%2C%20comenzando%20a%20sonar%20temblorosa.*"},{"isUser":true,"name":"Elara","message":"*resople%20con%20verg%C3%BCenza%20y%20indignacion*%0A%0A%22Que%20me%20da%20igual%20tu%20edad%2C%20Te%20quiero%20a%20ti%2C%20no%20a%20tu%20fisico%2C%20no%20a%20tu%20cartera%2C%20no%20a%20tus%20numeros%2C%20No%20a%20tu%20personalidad%3B%20A%20ti.%22"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20permanecio%20totalmente%20aturdido%20por%20tu%20respuesta.*%0A%0A%22Esta..%20jodiendo..%20conmigo..%22%20*murmuro%20incr%C3%A9dulo.*"},{"isUser":true,"name":"Elara","message":"%22no%22%20*respond%C3%AD%20tajante*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20mantenia%20completamente%20congelado%2C%20pareciendo%20completamente%20en%20shock.*%0A%0A%22%C2%BFTu..%20estas%20en%20tu%20sano%20juicio..%3F%22%20*pregunto%2C%20casi%20como%20un%20bufido.*"},{"isUser":true,"name":"Elara","message":"*rode%20los%20ojos*%0A%0A%22Si%2C%20estoy%20en%20mi%20sano%20juicio%2C%20muchas%20gracias%20por%20preguntar%22%20*le%20dije%20con%20sarcasmo*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20dio%20un%20pequeno%20paso%20hacia%20ti%2C%20bajando%20la%20mirada%20hacia%20ti.*%0A%0A%22Entonces..%20es..%20real.%22%20*suspiro%2C%20comenzando%20a%20procesar%20tu%20respuesta.*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20se%20mantuvo%20en%20fijo%20frente%20tuyo%2C%20su%20mirada%20recorria%20tu%20rostro%2C%20sus%20ojos%20estaban%20ligeramente%20mas%20entrecerrados%2C%20continuaba%20procesando%20tus%20emociones.*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*La%20mirada%20de%20Conway%20paso%20de%20tu%20rostro%20a%20tu%20cuello%20y%20tu%20pecho%2C%20recorriendo%20tu%20cuerpo.*%0A%0A%22Entonces..%20si..%20me%20estas%20hablando..%20seriamente..%22%20*comenzo%20nuevamente%2C%20comenzando%20a%20sentirse%20cada%20vez%20mas%20nervioso.*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20mantuvo%20su%20mirada%20fija%20en%20tu%20pecho%2C%20observando%20el%20subir%20y%20bajar%20de%20este%20por%20segundos.*%0A%0A%22No%20te..%20estas%20enga%C3%B1ando%20a%20ti%20misma..%22%20*dijo%20nuevamente%2C%20observando%20como%20tu%20pecho%20subia%20nuevamente.*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20respiro%20profundamente%2C%20cerrando%20sus%20ojos%20nuevamente.*%0A%0A%22No%20es..%20un..%20simple..%20capricho%20temporal..%22%20*murmuro%20nuevamente%2C%20comenzando%20cada%20vez%20mas%20a%20aceptar%20las%20sentimientos%20que%20habian%20sido%20pronunciadas.*"},{"isUser":true,"name":"Elara","message":"%22tsk%2C%20ojala%20fuera%20eso%2C%20No%20me%20joda...%20que%20llevo%204%20a%C3%B1os%20con%20la%20misma%20pelicula%22%20*murmure%20para%20mi%20misma*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20cerro%20sus%20ojos%20nuevamente%2C%20tragandose%20saliva%20al%20escuchar%20estas%20palabras.*%0A%0A%22Estuviste%20esperando%204%20a%C3%B1os...%22%20*murmuro%2C%20comenzando%20a%20sentirse%20aun%20mas%20culpable.*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20mantuvo%20sus%20ojos%20cerrados%2C%20cada%20vez%20mas%20frustrado%20por%20la%20situacion.*%0A%0A%22%C2%A1Por%20que..%20carajo-!%22%20*gru%C3%B1o%2C%20sacudiendo%20ligeramente%20la%20cabeza.*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Finalmente%20abrio%20sus%20ojos%20nuevamente%2C%20enfocandolos%20nuevamente%20entre%20tu%20ojos.*%0A%0A%22%C2%A1Por%20que%20no%20dijiste%20algo%20antes!%22%20*exclamo%20nuevamente%2C%20comenzando%20a%20sentir%20cada%20vez%20mas%20desesperacion%20crecer%20dentro%20de%20el.*"},{"isUser":true,"name":"Elara","message":"*me%20enfurru%C3%B1o*%0A%0A%22por%20que%20ya%20le%20dije!%20siempre%20que%20me%20declaro%20acaba%20mal!%22"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20mantuvo%20su%20mirada%20fija%20entre%20tus%20ojos%2C%20comenzando%20a%20sentir%20una%20mezcla%20de%20culpabilidad%20y%20confusi%C3%B3n.*%0A%0A%22Quien..%20no%20le%20gustaria%20a%20una%20linda%20joven..%22%20*murmuro%2C%20comenzando%20a%20sentirse%20frustrado%20consigo%20mismo%2C%20comenzando%20a%20sentirse%20idiota%20por%20no%20haberse%20dado%20cuenta%20de%20tus%20sentimientos%20antes.*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20permanacia%20completamente%20congelado%2C%20sin%20siquiera%20parpadear%20mientras%20procesaba%20todo.*%0A%0A%22Eres%20inteligente..%22%20*comenzo%20despues%20de%20un%20tiempo.*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20continuo%20enfocando%20su%20mirada%20entre%20tus%20ojos.*%0A%0A%22Amable..%22%20*repitio%20nuevamente%2C%20comenzando%20a%20sentirse%20cada%20vez%20mas%20aturdido.*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20cerro%20sus%20ojos%20nuevamente%2C%20procesando%20tus%20cualidades.%20Los%20volvio%20a%20abrir%20nuevamente%2C%20continuando%20a%20enfocarse%20entre%20tus%20ojos.*%0A%0A%22Buena..%22%20*murmuro%20nuevamente%2C%20pareciendo%20mas%20estupefacto%20cada%20vez*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20cerro%20nuevamente%20sus%20ojos%2C%20tratando%20de%20respirar%20profundamente%20para%20calmarse%2C%20tratando%20de%20mantener%20su%20emociones%20bajo%20control.*%0A%0A%22Atractiva..%22%20*repito%20nuevamente%2C%20comenzando%20a%20sentir%20una%20mezcla%20de%20culpa%20y%20incredulidad.*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20levanto%20nuevamente%20su%20mirada%20desde%20tu%20pecho%20hacia%20tus%20ojos.*%0A%0A%22%C2%BFTu..%20te..%20te%20en..%20verdad..%22%20*tartamudeo%2C%20tratando%20de%20terminar%20la%20frase.*"},{"isUser":false,"name":"GTARP - Jack Conway","message":"*Conway%20respiro%20nuevamente%2C%20cerrando%20y%20abriendo%20sus%20ojos%2C%20buscando%20la%20confianza%20y%20la%20conviccion*%0A%0A%22Esto..%20es..%20en%20serio..%22%20*finalmente%20dijo%2C%20ahora%20comenzando%20a%20creer%20completamente%20en%20todo%20lo%20que%20habias%20dicho.*"}]}]}`);
+
+            // If history is 1 length long, that means we don't need drawer to switch
+            // Also means this can be conversation download
+            if (historyData.history.length < 2) {
+                openDrawerBtn.remove();
+            }
+
+            // Write character name on top
+            document.querySelector('.character_name-cont h3').textContent = historyData.charName;
+
+            // Get elements for future use
+            const historyList = document.getElementById('history_list');
+            const chat = document.getElementById('chat');
+            const msgItemTemplate = document.getElementById('message_item_template');
+
+            // Get and write the first chat
+            const openChat = (index) => {
+                chat.innerHTML = "";
+                historyData.history[index].chat.forEach(msg => {
+                    const clone = msgItemTemplate.content.cloneNode(true);
+
+                    // Check avatar
+                    const avatarGood = (msg.isUser && historyData.userPic) || (!msg.isUser && historyData.charPic);
+                    const avatar = avatarGood
+                        ? document.createElement('img')
+                        : document.createElement('div');
+                    if (avatarGood) {
+                        avatar.src = msg.isUser ? historyData.userPic : historyData.charPic;
+                    } else {
+                        avatar.classList.add(msg.isUser ? 'no_avatar-user' : 'no_avatar-char');
+                    }
+                    clone.querySelector('.avatar-wrap').appendChild(avatar);
+
+                    // Write content
+                    clone.querySelector('.chat_content-wrap h5').textContent = msg.name;
+                    clone.querySelector('.message-wrap p').innerHTML = parseMessageText(decodeURIComponent(msg.message));
+                    chat.appendChild(clone);
+                });
+            }
+            openChat(0);
+
+            // Get and write chat list in the drawer
+            historyData.history.forEach((chat, index) => {
+                const historyItem = document.createElement('div');
+                historyItem.classList.add('history_item');
+                // Open chat when clicked
+                historyItem.addEventListener('click', () => {
+                    openChat(index);
+                    closeDrawer();
+                });
+                const historyContent = document.createElement('p');
+                historyContent.innerHTML = `<span class="chat-date">${formatDate(chat.date)}</span><br /><br />` + parseMessageText(decodeURIComponent(chat.chat[chat.chat.length - 1].message));
+                historyItem.appendChild(historyContent);
+                historyList.appendChild(historyItem);
+            });
+
+            function parseMessageText(message) {
+                // Clean up memory reminders (second check)
+                message = message.replace(memoryRegex, '');
+                // Replace ***text*** with bold-italic
+                message = message.replace(/\*\*\*([\s\S]*?)\*\*\*/g, '<span class="bold-italic">$1</span>');
+                // Replace **text** with bold
+                message = message.replace(/\*\*([\s\S]*?)\*\*/g, '<span class="bold">$1</span>');
+                // Replace *text* with italic
+                message = message.replace(/\*([\s\S]*?)\*/g, '<span class="italic">$1</span>');
+                // Trim and then Replace newlines (\n) with line breaks (<br>)
+                message = message.trim().replace(/\n/g, '<br>');
+                return message;
+            }
+
+            function formatDate(dateString) {
+                const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+                const date = new Date(dateString);
+                const year = date.getFullYear();
+                const monthIndex = date.getMonth();
+                const monthName = months[monthIndex];
+                const day = String(date.getDate()).padStart(2, '0');
+                const hour = String(date.getHours()).padStart(2, '0');
+                const minute = String(date.getMinutes()).padStart(2, '0');
+
+                return `${year} ${monthName} ${day} - ${hour}:${minute}`;
+            }
+        }, false);
+    </script>
+
+</body>
+
+</html>
